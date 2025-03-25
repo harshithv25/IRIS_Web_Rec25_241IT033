@@ -1,41 +1,62 @@
 "use client";
 
-import { useContext } from "react";
-import { AuthContext, useAuth } from "../../../context/AuthContext";
+import { useLayoutEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import Background from "@/components/Background";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
-export default function Logout() {
-  const { logout } = useContext(AuthContext)!;
+export default function Logout({ params }: { params: { token: string } }) {
+  const { logout } = useAuth();
   const router = useRouter();
-  const { user } = useAuth();
+
+  useLayoutEffect(() => {
+    if (params.token === localStorage.getItem("token")) {
+      logout();
+      router.push("/login");
+    } else {
+      alert("Bad request");
+      router.push("/");
+    }
+  }, [params.token]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen gap-2">
-      <form
-        className="p-8"
-        onSubmit={(e) => {
-          e.preventDefault();
-          logout();
-          router.push("/login");
-        }}
-      >
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition"
-        >
-          Logout
-        </button>
-        <button
-          type="button"
-          className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition"
+    <div className="relative min-h-screen overflow-hidden">
+      <Background />
+      <Navbar />
+      <div className="flex flex-row justify-center items-center min-h-screen relative z-10 w-full snap-y snap-mandatory px-12 mx-auto gap-10">
+        <form
+          className="p-8 flex flex-col justify-center items-center"
           onSubmit={(e) => {
             e.preventDefault();
+            logout();
             router.push("/login");
           }}
         >
-          Login
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-55 cursor-pointer p-3 mt-4 rounded-lg text-white font-semibold border-3 border-[#3e3e3e]"
+          >
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+              Log Out
+            </span>
+          </button>
+          <button
+            type="button"
+            className="w-55 cursor-pointer p-3 mt-4 rounded-lg text-white font-semibold border-3 border-[#3e3e3e]"
+            onSubmit={(e) => {
+              e.preventDefault();
+              router.push("/login");
+            }}
+          >
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+              Login
+            </span>
+          </button>
+        </form>
+        <Footer />
+      </div>
     </div>
   );
 }

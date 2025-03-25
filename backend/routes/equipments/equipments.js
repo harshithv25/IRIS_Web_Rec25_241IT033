@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
     const equipment = new Equipment({
       name,
       category,
-      availability,
+      media,
       quantity,
       condition,
     });

@@ -1,17 +1,42 @@
-import { AuthProvider } from "../../context/AuthContext";
 import type { Metadata } from "next";
 import "./globals.css";
-import { Montserrat } from "next/font/google";
+import { Orbitron } from "next/font/google";
+import React from "react";
+import { AuthProvider } from "@/context/AuthContext";
 
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Sports Booking",
-  description: "NITK Sports Infrastructure Booking System",
+  title: "Sportshub",
+  description: "Dashboard for all your sports needs - NITK",
+  icons: {
+    icon: "/favicon.ico",
+    // apple: '/apple-touch-icon.png',
+  },
+  openGraph: {
+    title: "Sportshub NITK",
+    description: "Dashboard for all your sports needs - NITK",
+    url: "https://sportshub-nitk.com",
+    siteName: "Sportshub NITK",
+    images: [
+      {
+        url: "/path-to-your-logo.png",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sportshub NITK",
+    description: "Dashboard for all your sports needs - NITK",
+    images: ["/path-to-your-logo.png"],
+  },
 };
+
 export default function RootLayout({
   children,
 }: {
@@ -19,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${montserrat.variable} antialiased`}>
+      <body className={`${orbitron.variable} antialiased`}>
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

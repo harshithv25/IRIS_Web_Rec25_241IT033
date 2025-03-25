@@ -1,79 +1,177 @@
 "use client";
-import { useContext, useState } from "react";
-import { AuthContext, useAuth } from "../../../context/AuthContext";
 
-export default function Login() {
-  const { login } = useContext(AuthContext)!;
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const { user } = useAuth();
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { Eye, EyeOff, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import Navbar from "@/components/Navbar";
+import Background from "@/components/Background";
+import Footer from "@/components/Footer";
+import { useRouter } from "next/navigation";
+import { validateEmail } from "@/utils/formValidations";
+
+export default function LoginPage() {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [err, setErr] = useState({
+    isErr: false,
+    errMessage: "",
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const { user, login } = useAuth();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleClick = async () => {
+    if (step === 1) {
+      if (!validateEmail(form.email)) {
+        setErr({ isErr: true, errMessage: "Enter a valid email address." });
+        setForm({ ...form, email: "" });
+      } else {
+        setErr({ isErr: false, errMessage: "" });
+        setStep(2);
+      }
+    }
+    if (step === 2) {
+      if (form.password.length < 6) {
+        setErr({
+          isErr: true,
+          errMessage: "Password too short!",
+        });
+      } else {
+        setErr({ isErr: false, errMessage: "" });
+        login(form.email, form.password)
+          .then(() => {
+            router.push("/");
+          })
+          .catch(async (e: any) => {
+            setErr({ isErr: true, errMessage: await e.json().message });
+            setForm({ email: "", password: "" });
+            setStep(1);
+          });
+      }
+    }
+  };
+
+  console.log(user);
 
   return (
-    <>
-      {!user ? (
-        <div className="flex justify-center items-center min-h-screen">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              login(email, password);
-            }}
-            className="bg-gray p-8 rounded-lg shadow-md w-96"
-          >
-            <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+    <div className="relative min-h-screen overflow-hidden">
+      <Navbar />
+      <Background />
+      <div className="flex flex-col justify-center items-center min-h-screen relative z-10 w-full snap-y snap-mandatory px-12 mx-auto">
+        {!user ? (
+          <>
+            <div className="p-6 rounded-xl backdrop-blur shadow-lg w-96 text-white border-1 border-[#6770d2]">
+              <div className="flex justify-center mb-4">
+                <Image
+                  src="/media/noBgColor.png"
+                  alt="Logo"
+                  width={200}
+                  height={100}
+                />
+              </div>
 
-            <div className="mb-4">
-              <label className="block text-white-700 font-medium mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
+              <h2 className="text-2xl font-bold text-white mb-2 text-center">
+                Log In
+              </h2>
+
+              {err.isErr ? (
+                <>
+                  <p className="text-sm text-red-400 mb-6 text-center">
+                    {err.errMessage}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-400 mb-6 text-center">
+                    Login to manage your bookings!
+                  </p>
+                </>
+              )}
+
+              {/* Form */}
+              <div className="overflow-hidden relative h-13">
+                <motion.div
+                  initial={{ x: 0 }}
+                  animate={{ x: step === 2 ? "-50%" : "0%" }}
+                  transition={{ duration: 0.3 }}
+                  className="flex w-[200%]"
+                >
+                  <div className="w-full">
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      value={form.email}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#06070E] text-white rounded-lg border-3 border-[#3e3e3e] focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="w-full flex items-center relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      className="w-full p-3 bg-[#06070E] text-white rounded-lg border-3 border-[#3e3e3e] focus:outline-none"
+                    />
+                    <button
+                      className="absolute right-3 text-gray-400"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+
+              <button
+                onClick={handleClick}
+                className="w-full cursor-pointer p-2 mt-4 rounded-lg text-white font-semibold border-3 border-[#3e3e3e]"
+              >
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                  {step === 1 ? "Next" : "Log In"}
+                </span>
+              </button>
+
+              <div className="flex justify-center mt-3 text-sm text-gray-400">
+                <a
+                  href="/register"
+                  className="cursor-pointer hover:underline font-bold"
+                >
+                  Register Now
+                </a>
+              </div>
             </div>
-
-            <div className="mb-4">
-              <label className="block text-white-700 font-medium mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition"
-            >
-              Login
-            </button>
-
-            <p className="mt-4 text-center text-gray-600">
-              Dont have an account?{" "}
-              <a href="/register" className="text-blue-500 hover:underline">
-                Register here
-              </a>
-            </p>
-            <p className="text-center text-gray-600">
-              <a href="/logout" className="text-blue-500 hover:underline">
-                Logout
-              </a>
-            </p>
-          </form>
-        </div>
-      ) : (
-        <>
-          <h1>You are already logged in. {user?.name}</h1>
-        </>
-      )}
-    </>
+          </>
+        ) : (
+          <div className="p-6 rounded-xl backdrop-blur shadow-lg w-96 text-white border-1 border-[#6770d2]">
+            <h1>
+              You are already logged in. {user?.name}
+              <button
+                onClick={() =>
+                  router.push(`/logout?token=${localStorage.getItem("token")}`)
+                }
+                className="cursor-pointer flex items-center gap-1 hover:underline"
+              >
+                <LogOut size={16} /> Logout
+              </button>
+            </h1>
+          </div>
+        )}
+      </div>
+      <Footer />
+    </div>
   );
 }
