@@ -13,7 +13,10 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   csrfToken: string | undefined;
-  login: (email: string, password: string) => Promise<void>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ isErr: boolean; errMessage: string }>;
   logout: () => void;
   register: (
     name: string,
@@ -22,7 +25,7 @@ export interface AuthContextType {
     roll_number: string,
     password: string,
     role: string
-  ) => Promise<void>;
+  ) => Promise<{ isErr: boolean; errMessage: string }>;
 }
 
 export interface LoginResponse {

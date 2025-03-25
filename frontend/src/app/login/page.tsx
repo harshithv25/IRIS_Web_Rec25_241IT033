@@ -49,19 +49,23 @@ export default function LoginPage() {
       } else {
         setErr({ isErr: false, errMessage: "" });
         login(form.email, form.password)
-          .then(() => {
-            router.push("/");
+          .then((res) => {
+            if (res.isErr) {
+              setErr(res);
+              setForm({ email: "", password: "" });
+            } else {
+              setErr(res);
+              router.push("/");
+            }
           })
-          .catch(async (e: any) => {
-            setErr({ isErr: true, errMessage: await e.json().message });
+          .catch(async (e) => {
+            setErr(e);
             setForm({ email: "", password: "" });
             setStep(1);
           });
       }
     }
   };
-
-  console.log(user);
 
   return (
     <div className="relative min-h-screen overflow-hidden">

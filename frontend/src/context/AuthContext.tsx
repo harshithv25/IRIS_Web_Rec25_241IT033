@@ -50,14 +50,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const res = await fetch(`${baseUrl}/csrf/`, {
         method: "GET",
         credentials: "include",
-      }).catch((e) => {
-        console.log(e);
       });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Unable to provide a valid token");
+      }
+
       const data = await res?.json();
       setCsrfToken(data.csrfToken);
-      // return res.data.csrfToken;
     } catch (e) {
-      console.error("Couldnt authorize your identity", e);
+      throw new Error("Couldnt authorize your identity");
     }
   };
 
@@ -72,14 +75,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         body: JSON.stringify({ email, password }),
         credentials: "include",
         headers: myHeaders,
-      }).catch((e) => {
-        throw new Error(e);
       });
-      const data = await res?.json();
+
+      if (!res.ok) {
+        const err = await res.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const data = await res.json();
       setUser(data.user);
       localStorage.setItem("token", data.token);
+      return { isErr: false, errMessage: "" };
     } catch (error) {
       console.error("Login failed", error);
+      return { isErr: true, errMessage: error.message };
     }
   };
 
@@ -101,7 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       myHeaders.append("X-CSRFToken", csrfToken);
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const res = await fetch(`${baseUrl}/auth/register/`, {
         method: "POST",
         body: JSON.stringify({
@@ -114,11 +122,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }),
         credentials: "include",
         headers: myHeaders,
-      }).catch((e) => {
-        console.log(e);
       });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return { isErr: true, errMessage: err.error };
+      } else {
+        return { isErr: false, errMessage: "" };
+      }
     } catch (err) {
       console.error("Register failed", err);
+      return { isErr: true, errMessage: err.message };
     }
   };
 

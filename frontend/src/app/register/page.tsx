@@ -60,10 +60,36 @@ export default function Register() {
         form.roll_number,
         form.password,
         form.role
-      ).then(() => {
-        setLoading(false);
-        router.push("/login");
-      });
+      )
+        .then((res) => {
+          if (res.isErr) {
+            setErr(res);
+            setForm({
+              name: "",
+              email: "",
+              branch: "",
+              roll_number: "",
+              password: "",
+              role: "",
+            });
+            setLoading(false);
+          } else {
+            setErr(res);
+            router.push("/");
+          }
+        })
+        .catch((e) => {
+          setErr(e);
+          setForm({
+            name: "",
+            email: "",
+            branch: "",
+            roll_number: "",
+            password: "",
+            role: "",
+          });
+          setLoading(false);
+        });
     }
   };
 

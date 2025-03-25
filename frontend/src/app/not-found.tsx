@@ -11,7 +11,7 @@ export default function NotFound() {
       <main className="grid min-h-screen z-10 relative place-items-center px-6 py-24 sm:py-32 lg:px-8">
         <div className="text-center">
           <GradientText>
-            <p className="text-xl font-bold text-[#D90429]">404</p>
+            <p className="text-xl font-bold">404</p>
           </GradientText>
           <h1 className="mt-4 text-balance text-5xl font-semibold tracking-tight text-white-900 sm:text-7xl">
             Page not found
