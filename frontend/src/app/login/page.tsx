@@ -53,6 +53,7 @@ export default function LoginPage() {
             if (res.isErr) {
               setErr(res);
               setForm({ email: "", password: "" });
+              setStep(1);
             } else {
               setErr(res);
               router.push("/");
