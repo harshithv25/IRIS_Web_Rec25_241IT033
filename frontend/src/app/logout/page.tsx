@@ -7,19 +7,27 @@ import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export default function Logout({ params }: { params: { token: string } }) {
+export default function Logout({
+  params,
+}: {
+  params: Promise<{ token: string }>;
+}) {
   const { logout } = useAuth();
   const router = useRouter();
 
   useLayoutEffect(() => {
-    if (params.token === localStorage.getItem("token")) {
-      logout();
-      router.push("/login");
-    } else {
-      alert("Bad request");
-      router.push("/");
-    }
-  }, [params.token]);
+    const clearUser = async () => {
+      if ((await params).token === localStorage.getItem("token")) {
+        logout();
+        router.push("/login");
+      } else {
+        alert("Bad request");
+        router.push("/");
+      }
+    };
+
+    clearUser();
+  });
 
   return (
     <div className="relative min-h-screen overflow-hidden">

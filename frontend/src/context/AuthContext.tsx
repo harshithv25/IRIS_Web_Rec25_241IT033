@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import {
@@ -24,7 +25,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (token) {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const decoded: any = jwtDecode(token);
         console.log(decoded);
         setUser({
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const data = await res?.json();
       setCsrfToken(data.csrfToken);
-    } catch (e) {
+    } catch {
       throw new Error("Couldnt authorize your identity");
     }
   };
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(data.user);
       localStorage.setItem("token", data.token);
       return { isErr: false, errMessage: "" };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed", error);
       return { isErr: true, errMessage: error.message };
     }
@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         return { isErr: false, errMessage: "" };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Register failed", err);
       return { isErr: true, errMessage: err.message };
     }
