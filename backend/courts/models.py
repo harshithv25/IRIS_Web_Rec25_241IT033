@@ -11,20 +11,24 @@ class Court:
     
     @staticmethod
     def create(data):
-        court = Court.collection.insert_one(court)
-        return Court.collection.find_one({"_id": court.inserted_id})
+        court = Court.collection.insert_one(data)
+        return Court.get_one({"_id": court.inserted_id})
 
     @staticmethod
     def get_all():
-        return list(Court.collection.find({}, {"_id": 0}))
+        return list(Court.collection.find({}))
+    
+    @staticmethod
+    def get_all_by_constraint(field_type, field_value):
+        return list(Court.collection.find({field_type: field_value}))
 
     @staticmethod
     def get_one(court_id):
-        return Court.collection.find_one({"_id": ObjectId(court_id)}, {"_id": 0})
+        return Court.collection.find_one({"_id": ObjectId(court_id)})
 
     @staticmethod
     def update(court_id, data):
-        court = courts_collection.find_one_and_update(
+        court = Court.collection.find_one_and_update(
             {"_id": ObjectId(court_id)},
             {"$set": data},
             return_document=True

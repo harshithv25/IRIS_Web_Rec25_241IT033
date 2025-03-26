@@ -13,15 +13,19 @@ class Equipment:
     @staticmethod
     def create(data):
         equipment = Equipment.collection.insert_one(data) 
-        return Equipment.collection.find_one({"_id": equipment.inserted_id})
+        return Equipment.get_one(equipment.inserted_id)
 
     @staticmethod
     def get_all():
-        return list(Equipment.collection.find({}, {"_id": 0}))
+        return list(Equipment.collection.find({}))
+    
+    @staticmethod
+    def get_all_by_constraint(field_name, field_type):
+        return list(Equipment.collection.find({field_type: field_name}))
 
     @staticmethod
-    def get_one(equipment_id):
-        return Equipment.collection.find_one({"id": equipment_id}, {"_id": 0})
+    def get_one(court_id):
+        return Equipment.collection.find_one({"_id": ObjectId(court_id)})
 
     @staticmethod
     def update(equipment_id, data):

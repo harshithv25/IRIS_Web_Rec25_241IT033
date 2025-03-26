@@ -16,7 +16,7 @@ class User:
             data["password"] = make_password(data["password"])
         
         result = User.collection.insert_one(data)
-        return User.get_one("_id", result.__inserted_id)
+        return User.get_one("_id", result.inserted_id)
             
     @staticmethod
     def get_all():
@@ -24,7 +24,11 @@ class User:
 
     @staticmethod
     def get_one(field_type, field_value):
-        return User.collection.find_one({field_type: field_value})
+        if(field_type == "_id"):
+            return User.collection.find_one({field_type: ObjectId(field_value)})
+        
+        else:
+            return User.collection.find_one({field_type: field_value})
 
     @staticmethod
     def update(user_id, data):
