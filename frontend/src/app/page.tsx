@@ -123,7 +123,7 @@ export default function Page() {
 
         <section
           id="second-section"
-          className="w-full h-screen md:pt-0 lg:pt-15 pt-28 flex flex-col items-center justify-center text-white text-3xl snap-center relative gap-8"
+          className="w-full mb-10 md:mb-0 h-screen md:pt-0 lg:pt-15 pt-28 flex flex-col items-center justify-center text-white text-3xl snap-center relative gap-8"
         >
           <div className="absolute right-50p bottom-50p md:right-auto md:bottom-auto">
             <Image

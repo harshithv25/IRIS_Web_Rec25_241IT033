@@ -24,14 +24,14 @@ class Equipment:
         return list(Equipment.collection.find({field_type: field_name}))
 
     @staticmethod
-    def get_one(court_id):
-        return Equipment.collection.find_one({"_id": ObjectId(court_id)})
+    def get_one(equipment_id):
+        return Equipment.collection.find_one({"_id": ObjectId(equipment_id)})
 
     @staticmethod
-    def update(equipment_id, data):
+    def update(equipment_id, data, query):
         return Equipment.collection.find_one_and_update(
             {"_id": ObjectId(equipment_id)}, 
-            {"$set": data}, 
+            query, 
             return_document=ReturnDocument.AFTER
         )
 

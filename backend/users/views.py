@@ -1,5 +1,4 @@
 from django.conf import settings
-from pymongo import MongoClient       
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,11 +9,6 @@ from .models import User
 from .serializers import UserSerializer
 import jwt
 import datetime
-
-client = MongoClient(settings.MONGO_URI)
-db = client[settings.MONGO_DB_NAME]
-
-collection = db["users"]
 
 class GetCSRFToken(APIView):
     permission_classes = [AllowAny]
@@ -54,13 +48,13 @@ class LoginView(APIView):
 
             user["_id"] = str(user["_id"])
             token_payload = {
-                "_id": str(user["_id"]),
+                "_id": str(user.get("_id", "")),
                 "email": user["email"],
                 "name": user["name"],
                 "branch": user["branch"],
                 "roll_number": user["roll_number"],
                 "role": user["role"],
-                "exp": datetime.datetime.now() + datetime.timedelta(days=7),
+                "exp": datetime.datetime.now() + datetime.timedelta(days=30),
                 "iat": datetime.datetime.now(),
             }
             token = jwt.encode(token_payload, settings.SECRET_KEY, algorithm="HS256")

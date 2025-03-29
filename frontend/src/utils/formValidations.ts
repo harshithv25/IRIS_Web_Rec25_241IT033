@@ -1,4 +1,4 @@
-import { User } from "@/schemas/schemas";
+import { Court, Equipment, User } from "@/schemas/schemas";
 
 const email_regex = "\\w+([-+.']\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*";
 const rollNumber_regex = "\\d\\d\\d[A-Za-z][A-Za-z][A-Za-z]\\d\\d\\d";
@@ -35,6 +35,42 @@ export function validateRegister(data: User) {
   ) {
     err.isErr = true;
     err.errMessage = "Role has to be either admin/user";
+  }
+
+  return { isErr: err.isErr, errMessage: err.errMessage };
+}
+
+export function validateCourt(data: Court) {
+  const err = { isErr: false, errMessage: "" };
+
+  if (
+    !data.admin_id ||
+    !data.location ||
+    !data.available ||
+    !data.name ||
+    !data.operating_hours ||
+    !data.capacity
+  ) {
+    err.isErr = true;
+    err.errMessage = "Provided data is not valid";
+  }
+
+  return { isErr: err.isErr, errMessage: err.errMessage };
+}
+
+export function validateEquipment(data: Equipment) {
+  const err = { isErr: false, errMessage: "" };
+
+  if (
+    !data.admin_id ||
+    !data.category ||
+    !data.available ||
+    !data.name ||
+    !data.condition ||
+    !data.quantity
+  ) {
+    err.isErr = true;
+    err.errMessage = "Provided data is not valid";
   }
 
   return { isErr: err.isErr, errMessage: err.errMessage };

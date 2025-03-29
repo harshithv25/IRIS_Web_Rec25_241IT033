@@ -22,14 +22,15 @@ export interface Booking {
   validated?: boolean | null;
   cancel_status?: { cancelled: boolean; reason: string };
   expired?: boolean;
+
+  type?: string;
 }
 
 export interface Equipment {
   _id?: string;
-  admin_id: string;
+  admin_id: string | undefined;
   name: string;
   category: string;
-  media: string;
   quantity: number;
   condition: string;
   available?: boolean;
@@ -37,19 +38,17 @@ export interface Equipment {
 
 export interface Court {
   _id?: string;
-  admin_id: string;
+  admin_id: string | undefined;
   name: string;
   location: string;
-  media: string;
-  quantity: number;
+  capacity: number;
   operating_hours?: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
+    monday: string[];
+    tuesday: string[];
+    wednesday: string[];
+    thursday: string[];
+    friday: string[];
+    saturday: string[];
   };
   available?: boolean;
 }
@@ -76,33 +75,33 @@ export interface DataContextType {
   bookings: Booking[] | null;
   equipments: Equipment[] | null;
   courts: Court[] | null;
-  myEquipments: Equipment[] | null;
-  myCourts: Court[] | null;
-  newBooking: (booking: Booking) => Promise<Booking>;
-  newEquipment: (equipment: Equipment) => Promise<Equipment>;
-  newCourt: (court: Court) => Promise<Court>;
-  getBookings: (field_type: string, field_value: string) => Promise<Booking[]>;
+  newBooking: (booking: Booking) => Promise<ErrorProps>;
+  newEquipment: (equipment: Equipment) => Promise<ErrorProps>;
+  newCourt: (court: Court) => Promise<ErrorProps>;
+  getBookings: (
+    field_type: string | null,
+    field_value: string | null,
+    getAll: boolean,
+    getBy: string
+  ) => Promise<ErrorProps>;
   getEquipments: (
-    field_type: string,
-    field_value: string
-  ) => Promise<Equipment[]>;
-  getCourts: (field_type: string, field_value: string) => Promise<Court[]>;
-  getMyEquipments: (
-    field_type: string,
-    field_value: string
-  ) => Promise<Equipment[]>;
-  getMyCourts?: (field_type: string, field_value: string) => Promise<Court[]>;
+    field_type: string | null,
+    field_value: string | null
+  ) => Promise<ErrorProps>;
+  getCourts: (
+    field_type: string | null,
+    field_value: string | null
+  ) => Promise<ErrorProps>;
   updateBooking: (
     booking_id: string,
     data: Booking | null,
-    type: string,
-    user_id: string
-  ) => Promise<Booking>;
+    type?: string
+  ) => Promise<ErrorProps>;
   updateEquipment: (
     equipment_id: string,
     data: Equipment | null
-  ) => Promise<Equipment>;
-  updateCourt: (court_id: string, data: Court | null) => Promise<Court>;
+  ) => Promise<ErrorProps>;
+  updateCourt: (court_id: string, data: Court | null) => Promise<ErrorProps>;
 }
 
 export interface LoginResponse {
@@ -116,6 +115,11 @@ export interface RegisterResponse {
 
 export interface CSRFResponse {
   csrfToken: string;
+}
+
+export interface ErrorProps {
+  isErr: boolean;
+  errMessage: string;
 }
 
 export interface AuroraProps {

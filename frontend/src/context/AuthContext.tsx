@@ -27,14 +27,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const decoded: any = jwtDecode(token);
         console.log(decoded);
-        setUser({
-          _id: decoded.id,
-          name: decoded.name,
-          email: decoded.email,
-          branch: decoded.branch,
-          roll_number: decoded.rollNumber,
-          role: decoded.role,
-        });
+
+        if (decoded.exp * 1000 < Date.now()) {
+          console.log("Token expired");
+          setUser(null);
+          localStorage.removeItem("token"); // Clear expired token
+        } else {
+          setUser({
+            _id: decoded._id,
+            name: decoded.name,
+            email: decoded.email,
+            branch: decoded.branch,
+            roll_number: decoded.roll_number,
+            role: decoded.role,
+          });
+        }
       } catch (error) {
         console.error("Invalid token:", error);
         logout();
@@ -47,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const getCsrfToken = async () => {
     try {
-      const res = await fetch(`${baseUrl}/csrf/`, {
+      const res = await fetch(`${baseUrl}/users/csrf/`, {
         method: "GET",
         credentials: "include",
       });
@@ -70,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       myHeaders.append("X-CSRFToken", csrfToken);
 
-      const res = await fetch(`${baseUrl}/auth/login/`, {
+      const res = await fetch(`${baseUrl}/users/login/`, {
         method: "POST",
         body: JSON.stringify({ email, password }),
         credentials: "include",
@@ -110,7 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       myHeaders.append("X-CSRFToken", csrfToken);
 
-      const res = await fetch(`${baseUrl}/auth/register/`, {
+      const res = await fetch(`${baseUrl}/users/register/`, {
         method: "POST",
         body: JSON.stringify({
           name,

@@ -12,7 +12,7 @@ class Court:
     @staticmethod
     def create(data):
         court = Court.collection.insert_one(data)
-        return Court.get_one({"_id": court.inserted_id})
+        return Court.get_one(court.inserted_id)
 
     @staticmethod
     def get_all():
@@ -24,7 +24,7 @@ class Court:
 
     @staticmethod
     def get_one(court_id):
-        return Court.collection.find_one({"_id": ObjectId(court_id)})
+        return Court.collection.find_one({"_id": court_id})
 
     @staticmethod
     def update(court_id, data):

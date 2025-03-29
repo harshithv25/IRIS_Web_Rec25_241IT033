@@ -31,16 +31,23 @@ class User:
             return User.collection.find_one({field_type: field_value})
 
     @staticmethod
-    def update(user_id, data):
+    def update(user_id, data, query):
         if "password" in data:
             data["password"] = make_password(data["password"])  # Hash new password
 
         user = User.collection.find_one_and_update(
             {"_id": ObjectId(user_id)}, 
-            {"$set": data}, 
+            query, 
             return_document=True
         )
         return user
+    
+    @staticmethod
+    def add_penalty(user_id, penalty_data):
+        return User.collection.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$push": {"penalties": penalty_data}}
+        )
     
     @staticmethod
     def delete(user_id):

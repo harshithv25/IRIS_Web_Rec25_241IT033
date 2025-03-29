@@ -7,23 +7,14 @@ import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export default function Logout({
-  params,
-}: {
-  params: Promise<{ token: string }>;
-}) {
+export default function Logout() {
   const { logout } = useAuth();
   const router = useRouter();
 
   useLayoutEffect(() => {
     const clearUser = async () => {
-      if ((await params).token === localStorage.getItem("token")) {
-        logout();
-        router.push("/login");
-      } else {
-        alert("Bad request");
-        router.push("/");
-      }
+      logout();
+      router.push("/login");
     };
 
     clearUser();
