@@ -1,8 +1,10 @@
 from users.models import User
 from equipment.models import Equipment
+from courts.models import Court
 from bson import ObjectId
 from django.conf import settings
 from datetime import datetime, timedelta
+from dateutil.parser import isoparse
 from pymongo import MongoClient
 import math, random
 
@@ -25,25 +27,34 @@ class Booking:
 
     @staticmethod
     def create(data):
-        user_id = ObjectId(data['user_id'])
-        start_time = datetime.strptime(data['start_time'], "%Y-%m-%d %H:%M:%S")
-        start_date = start_time.date()
+        today = datetime.utcnow().date()
+        tomorrow = today + timedelta(days=1)
+        today_start = datetime.combine(today, datetime.min.time()).isoformat() + "Z"
+        tomorrow_end = datetime.combine(tomorrow, datetime.max.time()).isoformat() + "Z"
         
-        existing_booking = Booking.collection.find_one({
-            'user_id': user_id,
-            'start_time': {
-                '$gte': datetime.combine(start_date, datetime.min.time()),
-                '$lt': datetime.combine(start_date + timedelta(days=1), datetime.min.time())
-            }
-        })
+        existing_bookings = Booking.get_all_by_constraint("user_id", ObjectId(data["user_id"]))
+        if data["booking_type"] == "Equipment": 
+            equipment = Equipment.get_one(data["infrastructure_id"])
+            if not equipment["available"] or equipment["quantity"] - 1  < 1:
+                raise ValueError("Equipment is unavailable")
+        else:
+            court = Court.get_one(data["infrastructure_id"])
+            if not court["available"]:
+                raise ValueError("Court is unavailable")
         
-        if existing_booking:
-            raise ValueError("User already has a booking for this date")
-        
+        for booking in existing_bookings:
+            start_time_str = booking["start_time"]
+            start_time = isoparse(start_time_str)  # Convert to datetime
+
+            if (today_start <= start_time.isoformat() <= tomorrow_end) and (booking["expired"] == False):
+                raise ValueError("You can only make one booking per day")
+
         data = {**data, "waitlist": {}}
+        data["admin_id"] = ObjectId(data["admin_id"])
+        data["infrastructure_id"] = ObjectId(data["infrastructure_id"])
         
         booking = Booking.collection.insert_one(data)
-        return Booking.get_one("_id", booking.inserted_id)
+        return Booking.get_one("_id", ObjectId(booking.inserted_id))
 
     @staticmethod
     def get_all():
@@ -53,8 +64,13 @@ class Booking:
     def get_all_by_constraint(field_type, field_value):
         return list(Booking.collection.find({
             "$or": [
-                {field_type: field_value},  # Direct match for user_id
-                {f"waitlist.{'$exists'}": True, f"waitlist": {"$in": [field_value]}}  # Check if user_id is in waitlist
+                {field_type: field_value},  # Direct match (user_id, admin_id, etc.)
+                {"waitlist": {"$elemMatch": {"$eq": field_value}}},  # For array waitlists
+                # For object waitlists with numeric keys:
+                {"$expr": {"$in": [field_value, {"$map": {
+                    "input": {"$objectToArray": "$waitlist"},
+                    "in": "$$this.v"
+                }}]}}
             ]
         }))
 
@@ -62,7 +78,7 @@ class Booking:
     @staticmethod
     def get_one(field_type, field_value):
         if(field_type == "_id"):
-            return Booking.collection.find_one({field_type: ObjectId(field_type)})
+            return Booking.collection.find_one({field_type: field_value})
         else:
             return Booking.collection.find_one({field_type: field_value})
             
@@ -72,7 +88,7 @@ class Booking:
         if not booking:
             raise ValueError("Booking not found")
 
-        if type == "cancel" and data.user_id:
+        if type == "cancel" and data.get("user_id"):
             # Promote next user from waitlist
             waitlist = booking.get("waitlist", {})
             if len(waitlist) >= 1:
@@ -94,24 +110,29 @@ class Booking:
                     return booking
             
             # If no waitlist, just update with cancel data
+            
+            updated_data = {
+                "expired": True
+            }
+            
             booking = Booking.collection.find_one_and_update(
                 {"_id": ObjectId(booking_id)},
-                {"$set": data},
+                {"$set": updated_data},
                 return_document=True
             )
             return booking
 
         elif type == "check-in":
             # Verify admin and clear waitlist
-            if booking.get("admin_id") != ObjectId(data.admin_id):
+            if booking["admin_id"] != ObjectId(data["admin_id"]):
                 raise ValueError("Need to be an admin to check in users")
             
-            if booking.get("password") != data.password:
+            if booking["password"] != data["password"]:
                 raise ValueError("Invalid password")
             
-            if data.get("booking_type") == "Equipment":
+            if data["booking_type"] == "Equipment":
                 equipment_id = ObjectId(data["infrastructure_id"])
-                equipment = Equipment.get_one("_id", equipment_id)
+                equipment = Equipment.get_one(equipment_id)
 
                 if not equipment or equipment["quantity"] < 1:
                     raise ValueError("Equipment not available")
@@ -144,7 +165,7 @@ class Booking:
                 "booking_id": ObjectId(booking_id),
                 "reason": data["penalty_reason"],
                 "issued_by": ObjectId(data.admin_id),
-                "expires_at": expires_at,
+                "expires_at": expires_at.isoformat(),
                 "is_active": True
             }
             
@@ -166,12 +187,12 @@ class Booking:
             return penalty_invoice
 
         elif type == "validate":
-            if booking.get("admin_id") != ObjectId(data.admin_id):
+            if booking["admin_id"] != ObjectId(data["admin_id"]):
                 raise ValueError("Need to be an admin to validate bookings")
             
             if data.get("booking_type") == "Equipment":
                 equipment_id = ObjectId(data["infrastructure_id"])
-                equipment = Equipment.get_one("_id", equipment_id)
+                equipment = Equipment.get_one(equipment_id)
 
                 if not equipment or equipment["quantity"] < 1:
                     raise ValueError("Equipment not available")
@@ -187,7 +208,7 @@ class Booking:
             return booking
 
         elif type == "deny":
-            if "reason" not in data:
+            if "reason" not in data["cancel_status"]:
                 raise ValueError("Reason required for denial")
                 
             booking = Booking.collection.find_one_and_update(
@@ -195,7 +216,7 @@ class Booking:
                 {"$set": {
                     "cancel_status": {
                         "cancelled": True,
-                        "reason": data["reason"]
+                        "reason": data["cancel_status"]["reason"]
                     },
                     "expired": True
                 }},
@@ -204,13 +225,27 @@ class Booking:
             return booking
 
         elif type == "waitlist":
+            today = datetime.utcnow().date()
+            tomorrow = today + timedelta(days=1)
+            today_start = datetime.combine(today, datetime.min.time()).isoformat() + "Z"
+            tomorrow_end = datetime.combine(tomorrow, datetime.max.time()).isoformat() + "Z"
+            
+            existing_bookings = Booking.get_all_by_constraint("user_id", ObjectId(data.get("user_id")))
+            
+            for booking in existing_bookings:
+                start_time_str = booking["start_time"]
+                start_time = isoparse(start_time_str)  # Convert to datetime
+
+                if today_start <= start_time.isoformat() <= tomorrow_end:
+                    raise ValueError("You can only make one booking per day")
+            
             waitlist = booking.get("waitlist", {})
             if len(waitlist) >= 4:  # Assuming max 4 waitlist spots
                 raise IndexError("Waitlist is full")
                 
             booking = Booking.collection.find_one_and_update(
                 {"_id": ObjectId(booking_id)},
-                {"$set": {f"waitlist.{len(waitlist)}": ObjectId(data.user_id)}},
+                {"$set": {f"waitlist.{len(waitlist)}": ObjectId(data.get("user_id"))}},
                 return_document=True
             )
             return booking

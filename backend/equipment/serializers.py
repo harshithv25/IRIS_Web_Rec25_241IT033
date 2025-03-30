@@ -7,6 +7,7 @@ class EquipmentSerializer(serializers.Serializer):
     category = serializers.ChoiceField(choices=["football", "cricket", "basketball", "chess", "billiards", "throwball", "kho-kho", "table-tennis", "tennis","swimming", "hockey", "badminton", "kabaddi", "volleyball", "carrom", "misc"])
     quantity = serializers.IntegerField(min_value=0)
     condition = serializers.ChoiceField(choices=["New", "Used", "Damaged"])
+    operating_hours = serializers.DictField()
     available = serializers.BooleanField(default=True)
 
     def validate_media(self, value):

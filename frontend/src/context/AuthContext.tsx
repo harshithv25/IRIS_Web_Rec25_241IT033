@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
-        console.log(decoded);
 
         if (decoded.exp * 1000 < Date.now()) {
           console.log("Token expired");
@@ -158,3 +157,21 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// in the create court form i need to make a few changes.
+// const availableSlots = [
+//   "11:00-12:00",
+//   "12:00-13:00",
+//   "13:00-14:00",
+//   "14:00-15:00",
+//   "15:00-16:00",
+//   "16:00-17:00",
+//   "17:00-18:00",
+//   "18:00-19:00",
+//   "19:00-20:00",
+//   "20:00-21:00",
+//   "21:00-22:00",
+//   "22:00-23:00",
+// ];
+
+// I need it to display the hours in the ui but when sending the data to the backend i want it to send it with that days timestamp (of that hour) lets say i book it for 11-12 for tomorrow i need it to show [timestampof11amthenextday - timestampof12noonthenextday] but ofcourse when it is displayed, i want it to display just the hour. use moment js to achieve this.

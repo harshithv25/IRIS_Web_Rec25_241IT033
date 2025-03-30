@@ -101,7 +101,7 @@ export default function Navbar() {
             </>
           )}
           <Link
-            href={!user ? "/login" : "/book/equipments"}
+            href={!user ? "/login" : "/book/equipment"}
             className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
           >
             Book Now!

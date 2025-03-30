@@ -1,10 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import {
+  JSXElementConstructor,
+  Key,
+  ReactElement,
+  ReactNode,
+  ReactPortal,
+  useLayoutEffect,
+  useState,
+} from "react";
 import Navbar from "@/components/Navbar";
 import Background from "@/components/Background";
 import Footer from "@/components/Footer";
 import {
+  Calendar,
   ChevronDown,
   HeartPulse,
   Home,
@@ -12,11 +22,36 @@ import {
   Pi,
   Plus,
   Volleyball,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { validateEquipment } from "@/utils/formValidations";
 import { useDataContext } from "@/context/DataContext";
 import { useRouter } from "next/navigation";
+import { capitalize } from "@/utils/capitalize";
+
+const daysOfWeek = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+];
+const availableSlots = [
+  "11-12",
+  "12-13",
+  "13-14",
+  "14-15",
+  "15-16",
+  "16-17",
+  "17-18",
+  "18-19",
+  "19-20",
+  "20-21",
+  "21-22",
+  "22-23",
+];
 
 const availableCategories = [
   "football",
@@ -50,6 +85,14 @@ export default function CreateEquipment() {
     quantity: 1,
     condition: "",
     available: true,
+    operating_hours: {
+      monday: [],
+      tuesday: [],
+      wednesday: [],
+      thursday: [],
+      friday: [],
+      saturday: [],
+    },
   });
   const [err, setErr] = useState({
     isErr: false,
@@ -59,23 +102,46 @@ export default function CreateEquipment() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  const toggleDropdown = (day: string) => {
+    setDropdowns((prev) => ({ [day]: !prev[day] }));
+  };
+
+  const addSlot = (day: string, slot: string) => {
+    setForm((prev) => {
+      const updatedHours = { ...prev.operating_hours };
+      if (!updatedHours[day]) updatedHours[day] = [];
+      if (!updatedHours[day].includes(slot)) updatedHours[day].push(slot);
+      return { ...prev, operating_hours: updatedHours };
+    });
+  };
+
+  const removeSlot = (day: string, slot: any) => {
+    setForm((prev) => {
+      const updatedHours = { ...prev.operating_hours };
+      updatedHours[day] = updatedHours[day].filter((s) => s !== slot);
+      if (updatedHours[day].length === 0) delete updatedHours[day];
+      return { ...prev, operating_hours: updatedHours };
+    });
+  };
+
   const handleQuantityChange = (delta: number) => {
-    console.log("first");
     setForm((prev) => ({
       ...prev,
       quantity: Math.max(1, prev.quantity + delta),
     }));
   };
 
-  useLayoutEffect(() => {
-    if (user?.role !== "Admin") {
-      throw Error("Something went wrong");
-    }
-  });
+  // useLayoutEffect(() => {
+  //   if (user?.role !== "Admin") {
+  //     throw Error("Something went wrong");
+  //   }
+  // });
 
   const handleClick = () => {
     setLoading(true);
+    console.log(user);
     setForm({ ...form, admin_id: user?._id });
+    console.log(form);
 
     if (validateEquipment(form).isErr) {
       setErr({
@@ -90,6 +156,14 @@ export default function CreateEquipment() {
         quantity: 1,
         condition: "",
         available: true,
+        operating_hours: {
+          monday: [],
+          tuesday: [],
+          wednesday: [],
+          thursday: [],
+          friday: [],
+          saturday: [],
+        },
       });
     } else {
       newEquipment(form)
@@ -103,12 +177,20 @@ export default function CreateEquipment() {
               quantity: 1,
               condition: "",
               available: true,
+              operating_hours: {
+                monday: [],
+                tuesday: [],
+                wednesday: [],
+                thursday: [],
+                friday: [],
+                saturday: [],
+              },
             });
             setLoading(false);
           } else {
             setErr(res);
             setLoading(false);
-            router.push("/dashboard/courts");
+            router.push("/dashboard/");
           }
         })
         .catch(async (e) => {
@@ -120,6 +202,14 @@ export default function CreateEquipment() {
             quantity: 1,
             condition: "",
             available: true,
+            operating_hours: {
+              monday: [],
+              tuesday: [],
+              wednesday: [],
+              thursday: [],
+              friday: [],
+              saturday: [],
+            },
           });
           setLoading(false);
         });
@@ -162,7 +252,9 @@ export default function CreateEquipment() {
             }
           >
             <Volleyball size={20} className="mr-3 text-gray-400" />
-            <span className="w-full">{form.category || "Category"}</span>
+            <span className="w-full">
+              {capitalize(form.category) || "Category"}
+            </span>
             <ChevronDown size={20} className="text-gray-400" />
             {dropdowns.category && (
               <div className="mt-1 z-11 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-40 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
@@ -175,7 +267,7 @@ export default function CreateEquipment() {
                       setDropdowns((prev) => ({ ...prev, condition: false }));
                     }}
                   >
-                    {category}
+                    {capitalize(category)}
                   </div>
                 ))}
               </div>
@@ -229,6 +321,81 @@ export default function CreateEquipment() {
                 <Plus size={18} />
               </button>
             </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Time Slots</h3>
+            {daysOfWeek.map((day) => (
+              <div key={day} className="mb-4">
+                <div
+                  className="flex items-center justify-between bg-[#06070E] border border-3 border-[#3e3e3e] p-2 rounded-lg cursor-pointer"
+                  onClick={() => toggleDropdown(day)}
+                >
+                  <Calendar size={18} className="mr-2 text-gray-400" />
+                  <span>{capitalize(day)}</span>
+                  <Plus
+                    size={18}
+                    className={dropdowns[day] ? "rotate-45" : ""}
+                  />
+                </div>
+                {dropdowns[day] && (
+                  <div className="mt-1 flex overflow-y-scroll right-8 flex-col border border-3 border-[#3e3e3e] h-40 gap-2 bg-[#06070E] p-2 rounded-lg absolute">
+                    {availableSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        onClick={() => addSlot(day, slot)}
+                        className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-2 flex items-center justify-center flex flex-wrap gap-2">
+                  {form.operating_hours[day]?.map(
+                    (
+                      slot:
+                        | boolean
+                        | ReactElement<
+                            unknown,
+                            string | JSXElementConstructor<any>
+                          >
+                        | Iterable<ReactNode>
+                        | Promise<
+                            | string
+                            | number
+                            | bigint
+                            | boolean
+                            | ReactPortal
+                            | ReactElement<
+                                unknown,
+                                string | JSXElementConstructor<any>
+                              >
+                            | Iterable<ReactNode>
+                            | null
+                            | undefined
+                          >
+                        | Key
+                        | null
+                        | undefined
+                    ) => (
+                      <div
+                        key={slot}
+                        className="flex items-center gap-3 bg-black border border-1 border-[#3e3e3e] px-3 py-1 rounded-lg"
+                      >
+                        <span>{slot}</span>
+                        <button
+                          onClick={() => removeSlot(day, slot)}
+                          className="text-[#D90429] hover:text-[#FB4B68] cursor-pointer"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
 
           <button

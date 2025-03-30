@@ -13,15 +13,17 @@ export interface User {
 
 export interface Booking {
   _id?: string;
-  user_id: string;
+  user_id?: string;
   admin_id?: string;
-  infrastructure_id: string;
+  infrastructure_id: string | undefined;
+  name?: string;
   booking_type: string;
   start_time: string;
   end_time: string;
   validated?: boolean | null;
   cancel_status?: { cancelled: boolean; reason: string };
   expired?: boolean;
+  password?: string;
 
   type?: string;
 }
@@ -33,6 +35,14 @@ export interface Equipment {
   category: string;
   quantity: number;
   condition: string;
+  operating_hours?: {
+    monday: string[];
+    tuesday: string[];
+    wednesday: string[];
+    thursday: string[];
+    friday: string[];
+    saturday: string[];
+  };
   available?: boolean;
 }
 
@@ -73,35 +83,47 @@ export interface AuthContextType {
 
 export interface DataContextType {
   bookings: Booking[] | null;
-  equipments: Equipment[] | null;
+  equipment: Equipment[] | null;
   courts: Court[] | null;
+  adminBookings: Booking[] | null;
+  adminEquipments: Equipment[] | null;
+  adminCourts: Court[] | null;
   newBooking: (booking: Booking) => Promise<ErrorProps>;
   newEquipment: (equipment: Equipment) => Promise<ErrorProps>;
   newCourt: (court: Court) => Promise<ErrorProps>;
   getBookings: (
-    field_type: string | null,
-    field_value: string | null,
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
     getAll: boolean,
-    getBy: string
+    getBy: string,
+    admin: boolean
   ) => Promise<ErrorProps>;
-  getEquipments: (
-    field_type: string | null,
-    field_value: string | null
+  getEquipment: (
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
+    admin: boolean
   ) => Promise<ErrorProps>;
   getCourts: (
-    field_type: string | null,
-    field_value: string | null
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
+    admin: boolean
   ) => Promise<ErrorProps>;
   updateBooking: (
-    booking_id: string,
+    booking_id: string | undefined,
     data: Booking | null,
+    admin: boolean,
     type?: string
   ) => Promise<ErrorProps>;
   updateEquipment: (
-    equipment_id: string,
-    data: Equipment | null
+    equipment_id: string | undefined,
+    data: Equipment | null,
+    admin: boolean
   ) => Promise<ErrorProps>;
-  updateCourt: (court_id: string, data: Court | null) => Promise<ErrorProps>;
+  updateCourt: (
+    court_id: string | undefined,
+    data: Court | null,
+    admin: boolean
+  ) => Promise<ErrorProps>;
 }
 
 export interface LoginResponse {

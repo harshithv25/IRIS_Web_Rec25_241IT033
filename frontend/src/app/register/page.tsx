@@ -8,6 +8,7 @@ import Background from "@/components/Background";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import { validateRegister } from "@/utils/formValidations";
+import { capitalize } from "@/utils/capitalize";
 
 export default function Register() {
   const { user, register } = useContext(AuthContext)!;
@@ -54,12 +55,12 @@ export default function Register() {
     } else {
       setErr({ isErr: false, errMessage: "" });
       register(
-        form.name,
+        capitalize(form.name),
         form.email,
-        form.branch,
+        (form.branch),
         form.roll_number,
         form.password,
-        form.role
+        capitalize(form.role)
       )
         .then((res) => {
           if (res.isErr) {

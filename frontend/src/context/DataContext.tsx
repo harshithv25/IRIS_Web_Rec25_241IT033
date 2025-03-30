@@ -14,8 +14,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const { csrfToken } = useContext(AuthContext) ?? {};
   const [bookings, setBookings] = useState<Booking[] | null>(null);
-  const [equipments, setEquipments] = useState<Equipment[] | null>(null);
+  const [equipment, setEquipment] = useState<Equipment[] | null>(null);
   const [courts, setCourts] = useState<Court[] | null>(null);
+  const [adminCourts, setAdminCourts] = useState<Court[] | null>(null);
+  const [adminEquipments, setAdminEquipments] = useState<Equipment[] | null>(
+    null
+  );
+  const [adminBookings, setAdminBookings] = useState<Booking[] | null>(null);
 
   const apiFetch = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("token");
@@ -25,70 +30,102 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       "X-CSRFToken": csrfToken || "",
     };
 
-    return fetch(`${baseUrl}/${url}`, {
-      ...options,
-      headers,
-      credentials: "include",
-    }).then((res) => res.json());
+    try {
+      const response = await fetch(`${baseUrl}/${url}`, {
+        ...options,
+        headers,
+        credentials: "include",
+      });
+
+      return response;
+    } catch (error: any) {
+      console.error("API Fetch failed:", error);
+      throw new Error(error.message || "Something went wrong");
+    }
   };
 
   const getBookings = async (
-    field_type: string | null,
-    field_value: string | null,
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
     getAll: boolean,
-    getBy: string
+    getBy: string,
+    admin: boolean
   ) => {
     try {
-      const data = await apiFetch(
+      const response = await apiFetch(
         `bookings/?getAll=${getAll}&getBy=${field_type}&value=${field_value}`
       );
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const data = await response?.json();
+      if (admin) {
+        setAdminBookings(data.bookings);
       } else {
         setBookings(data.bookings);
-        return { isErr: false, errMessage: "" };
       }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
   };
 
-  const getEquipments = async (
-    field_type: string | null,
-    field_value: string | null
+  const getEquipment = async (
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
+    admin: boolean
   ) => {
     try {
-      const data = await apiFetch(
+      const response = await apiFetch(
         `equipment/?getBy=${field_type}&value=${field_value}`
       );
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
-      } else {
-        setEquipments(data.equipment);
-        return { isErr: false, errMessage: "" };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
       }
+
+      const data = await response?.json();
+      if (admin) {
+        setAdminEquipments(data.equipment);
+      } else {
+        setEquipment(data.equipment);
+      }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
   };
 
   const getCourts = async (
-    field_type: string | null,
-    field_value: string | null
+    field_type: string | null | undefined,
+    field_value: string | null | undefined,
+    admin: boolean
   ) => {
     try {
-      const data = await apiFetch(
+      const response = await apiFetch(
         `courts/?getBy=${field_type}&value=${field_value}`
       );
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const data = await response?.json();
+
+      if (admin) {
+        setAdminCourts(data.courts);
       } else {
         setCourts(data.courts);
-        return { isErr: false, errMessage: "" };
       }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
@@ -96,39 +133,45 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
   const newBooking = async (booking: Booking) => {
     try {
-      const data = await apiFetch("bookings/", {
+      const response = await apiFetch("bookings/", {
         method: "POST",
         body: JSON.stringify(booking),
       });
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
-      } else {
-        setBookings((prev) =>
-          prev ? [...prev, data.bookings] : [data.bookings]
-        );
-        return { isErr: false, errMessage: "" };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
       }
+
+      const data = await response?.json();
+
+      setBookings((prev) =>
+        prev ? [...prev, data.bookings] : [data.bookings]
+      );
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
-      return { isErr: true, errMessage: error.message };
+      return { isErr: true, errMessage: error.error };
     }
   };
 
   const newEquipment = async (equipment: Equipment) => {
     try {
-      const data = await apiFetch("equipment/", {
+      const response = await apiFetch("equipment/", {
         method: "POST",
         body: JSON.stringify(equipment),
       });
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
-      } else {
-        setEquipments((prev) =>
-          prev ? [...prev, data.equipment] : [data.equipment]
-        );
-        return { isErr: false, errMessage: "" };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
       }
+
+      const data = await response?.json();
+
+      setEquipment((prev) =>
+        prev ? [...prev, data.equipment] : [data.equipment]
+      );
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
@@ -136,31 +179,51 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
 
   const newCourt = async (court: Court) => {
     try {
-      const data = await apiFetch("courts/", {
+      const response = await apiFetch("courts/", {
         method: "POST",
         body: JSON.stringify(court),
       });
 
-      if (!data.ok) {
-        return { isErr: true, errMessage: data.error };
-      } else {
-        setCourts((prev) => (prev ? [...prev, data.courts] : [data.courts]));
-        return { isErr: false, errMessage: "" };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
       }
+
+      const data = await response?.json();
+
+      setCourts((prev) => (prev ? [...prev, data.courts] : [data.courts]));
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
   };
 
-  const updateBooking = async (booking_id: string, data: Booking | null) => {
+  const updateBooking = async (
+    booking_id: string | undefined,
+    data: Booking | null,
+    admin: boolean,
+    type?: string
+  ) => {
     try {
-      const updatedData = await apiFetch(`bookings/`, {
+      const response = await apiFetch(`bookings/`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
 
-      if (!updatedData.ok) {
-        return { isErr: true, errMessage: updatedData.error };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const updatedData = await response?.json();
+
+      if (admin) {
+        setAdminBookings(
+          (prev) =>
+            prev?.map((b) =>
+              b._id === booking_id ? updatedData.bookings : b
+            ) || []
+        );
       } else {
         setBookings(
           (prev) =>
@@ -168,56 +231,87 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
               b._id === booking_id ? updatedData.bookings : b
             ) || []
         );
-        return { isErr: false, errMessage: "" };
       }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
   };
 
   const updateEquipment = async (
-    equipment_id: string,
-    data: Equipment | null
+    equipment_id: string | undefined,
+    data: Equipment | null,
+    admin: boolean
   ) => {
     try {
-      const updatedData = await apiFetch(`equipment/`, {
+      const response = await apiFetch(`equipment/`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
 
-      if (!updatedData.ok) {
-        return { isErr: true, errMessage: updatedData.error };
-      } else {
-        setEquipments(
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const updatedData = await response?.json();
+
+      if (admin) {
+        setAdminEquipments(
           (prev) =>
             prev?.map((e) =>
               e._id === equipment_id ? updatedData.equipment : e
             ) || []
         );
-        return { isErr: false, errMessage: "" };
+      } else {
+        setEquipment(
+          (prev) =>
+            prev?.map((e) =>
+              e._id === equipment_id ? updatedData.equipment : e
+            ) || []
+        );
       }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
   };
 
-  const updateCourt = async (court_id: string, data: Court | null) => {
+  const updateCourt = async (
+    court_id: string | undefined,
+    data: Court | null,
+    admin: boolean
+  ) => {
     try {
-      const updatedData = await apiFetch(`courts/`, {
+      const response = await apiFetch(`courts/`, {
         method: "PUT",
         body: JSON.stringify(data),
       });
 
-      if (!updatedData.ok) {
-        return { isErr: true, errMessage: updatedData.error };
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+
+      const updatedData = await response?.json();
+
+      if (admin) {
+        setAdminCourts(
+          (prev) =>
+            prev?.map((c) => (c._id === court_id ? updatedData.courts : c)) ||
+            []
+        );
       } else {
         setCourts(
           (prev) =>
             prev?.map((c) => (c._id === court_id ? updatedData.courts : c)) ||
             []
         );
-        return { isErr: false, errMessage: "" };
       }
+
+      return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
     }
@@ -227,13 +321,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     <DataContext.Provider
       value={{
         bookings,
-        equipments,
+        equipment,
         courts,
+        adminBookings,
+        adminCourts,
+        adminEquipments,
         newBooking,
         newEquipment,
         newCourt,
         getBookings,
-        getEquipments,
+        getEquipment,
         getCourts,
         updateBooking,
         updateEquipment,

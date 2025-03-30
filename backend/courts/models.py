@@ -24,7 +24,7 @@ class Court:
 
     @staticmethod
     def get_one(court_id):
-        return Court.collection.find_one({"_id": court_id})
+        return Court.collection.find_one({"_id": ObjectId(court_id)})
 
     @staticmethod
     def update(court_id, data):

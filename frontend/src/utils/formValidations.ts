@@ -66,6 +66,7 @@ export function validateEquipment(data: Equipment) {
     !data.category ||
     !data.available ||
     !data.name ||
+    !data.operating_hours ||
     !data.condition ||
     !data.quantity
   ) {

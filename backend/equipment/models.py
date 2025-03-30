@@ -20,7 +20,7 @@ class Equipment:
         return list(Equipment.collection.find({}))
     
     @staticmethod
-    def get_all_by_constraint(field_name, field_type):
+    def get_all_by_constraint(field_type, field_name):
         return list(Equipment.collection.find({field_type: field_name}))
 
     @staticmethod

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useLayoutEffect, useState } from "react";
@@ -9,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import { validateCourt } from "@/utils/formValidations";
 import { useDataContext } from "@/context/DataContext";
 import { useRouter } from "next/navigation";
+import { capitalize } from "@/utils/capitalize";
 
 const daysOfWeek = [
   "monday",
@@ -19,18 +21,18 @@ const daysOfWeek = [
   "saturday",
 ];
 const availableSlots = [
-  "11:00-12:00",
-  "12:00-13:00",
-  "13:00-14:00",
-  "14:00-15:00",
-  "15:00-16:00",
-  "16:00-17:00",
-  "17:00-18:00",
-  "18:00-19:00",
-  "19:00-20:00",
-  "20:00-21:00",
-  "21:00-22:00",
-  "22:00-23:00",
+  "11-12",
+  "12-13",
+  "13-14",
+  "14-15",
+  "15-16",
+  "16-17",
+  "17-18",
+  "18-19",
+  "19-20",
+  "20-21",
+  "21-22",
+  "22-23",
 ];
 
 export default function CreateCourt() {
@@ -56,7 +58,7 @@ export default function CreateCourt() {
     errMessage: "",
   });
   const [loading, setLoading] = useState(false);
-  const [dropdowns, setDropdowns] = useState({});
+  const [dropdowns, setDropdowns] = useState<{ [key: string]: boolean }>({});
   const router = useRouter();
 
   const toggleDropdown = (day: string) => {
@@ -88,11 +90,12 @@ export default function CreateCourt() {
     }));
   };
 
-  useLayoutEffect(() => {
-    if (user?.role !== "Admin") {
-      throw Error("Something went wrong");
-    }
-  });
+  // useLayoutEffect(() => {
+  //   if (user?.role !== "Admin") {
+  //     console.log(user);
+  //     throw Error("Something went wrong");
+  //   }
+  // }, [user]);
 
   const handleClick = () => {
     setLoading(true);
@@ -143,7 +146,7 @@ export default function CreateCourt() {
           } else {
             setErr(res);
             setLoading(false);
-            router.push("/dashboard/courts");
+            router.push("/dashboard/");
           }
         })
         .catch(async (e) => {
@@ -237,7 +240,7 @@ export default function CreateCourt() {
                   onClick={() => toggleDropdown(day)}
                 >
                   <Calendar size={18} className="mr-2 text-gray-400" />
-                  <span>{day}</span>
+                  <span>{capitalize(day)}</span>
                   <Plus
                     size={18}
                     className={dropdowns[day] ? "rotate-45" : ""}
@@ -257,7 +260,7 @@ export default function CreateCourt() {
                   </div>
                 )}
                 <div className="mt-2 flex items-center justify-center flex flex-wrap gap-2">
-                  {form.operating_hours[day]?.map((slot) => (
+                  {form?.operating_hours[day]?.map((slot) => (
                     <div
                       key={slot}
                       className="flex items-center gap-3 bg-black border border-1 border-[#3e3e3e] px-3 py-1 rounded-lg"
