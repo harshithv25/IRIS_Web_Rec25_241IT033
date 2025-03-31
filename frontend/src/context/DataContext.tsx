@@ -3,7 +3,13 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { DataContextType, Booking, Equipment, Court } from "@/schemas/schemas";
+import {
+  DataContextType,
+  Booking,
+  Equipment,
+  Court,
+  Analytics,
+} from "@/schemas/schemas";
 import { AuthContext } from "./AuthContext";
 import { baseUrl } from "@/utils/api";
 
@@ -16,6 +22,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
   const [bookings, setBookings] = useState<Booking[] | null>(null);
   const [equipment, setEquipment] = useState<Equipment[] | null>(null);
   const [courts, setCourts] = useState<Court[] | null>(null);
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [adminCourts, setAdminCourts] = useState<Court[] | null>(null);
   const [adminEquipments, setAdminEquipments] = useState<Equipment[] | null>(
     null
@@ -125,6 +132,22 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         setCourts(data.courts);
       }
 
+      return { isErr: false, errMessage: "" };
+    } catch (error: any) {
+      return { isErr: true, errMessage: error.message };
+    }
+  };
+
+  const getAnalytics = async (adminId: string | undefined) => {
+    try {
+      const response = await apiFetch(`analytics/?admin_id=${adminId}`);
+
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+      const data = await response?.json();
+      setAnalytics(data.analytics);
       return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
@@ -323,6 +346,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         bookings,
         equipment,
         courts,
+        analytics,
         adminBookings,
         adminCourts,
         adminEquipments,
@@ -332,6 +356,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         getBookings,
         getEquipment,
         getCourts,
+        getAnalytics,
         updateBooking,
         updateEquipment,
         updateCourt,

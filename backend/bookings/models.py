@@ -1,6 +1,7 @@
 from users.models import User
 from equipment.models import Equipment
 from courts.models import Court
+from analytics.models import Analytics
 from bson import ObjectId
 from django.conf import settings
 from datetime import datetime, timedelta
@@ -52,6 +53,34 @@ class Booking:
         data = {**data, "waitlist": {}}
         data["admin_id"] = ObjectId(data["admin_id"])
         data["infrastructure_id"] = ObjectId(data["infrastructure_id"])
+        
+        # === Update Analytics ===
+        admin_id = data["admin_id"]
+        infrastructure_name = str(data["name"])  # Convert ObjectId to string
+
+        analytics = Analytics.get_by_admin(admin_id)
+
+        if analytics:
+            # if infrastructure exists in `x`, increment the corresponding `y` value
+            if infrastructure_name in analytics["bookingCount"]["x"]:
+                index = analytics["bookingCount"]["x"].index(infrastructure_name)
+                analytics["bookingCount"]["y"][index] += 1
+            else:
+                # add new infrastructure entry
+                analytics["bookingCount"]["x"].append(infrastructure_name)
+                analytics["bookingCount"]["y"].append(1)
+            
+            Analytics.update(analytics["_id"], analytics)  # save
+        else:
+            # if no analytics entry exist, create new one
+            new_analytics_data = {
+                "admin_id": admin_id,
+                "bookingCount": {
+                    "x": [infrastructure_name],
+                    "y": [1]
+                }
+            }
+            Analytics.create(new_analytics_data)
         
         booking = Booking.collection.insert_one(data)
         return Booking.get_one("_id", ObjectId(booking.inserted_id))

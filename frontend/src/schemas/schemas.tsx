@@ -63,6 +63,15 @@ export interface Court {
   available?: boolean;
 }
 
+export interface Analytics {
+  _id: string;
+  admin_id: string;
+  bookingCount: {
+    x: string[];
+    y: number[];
+  };
+}
+
 export interface AuthContextType {
   user: User | null;
   csrfToken: string | undefined;
@@ -85,6 +94,7 @@ export interface DataContextType {
   bookings: Booking[] | null;
   equipment: Equipment[] | null;
   courts: Court[] | null;
+  analytics: Analytics | null;
   adminBookings: Booking[] | null;
   adminEquipments: Equipment[] | null;
   adminCourts: Court[] | null;
@@ -108,6 +118,7 @@ export interface DataContextType {
     field_value: string | null | undefined,
     admin: boolean
   ) => Promise<ErrorProps>;
+  getAnalytics: (adminId: string | undefined) => Promise<ErrorProps>;
   updateBooking: (
     booking_id: string | undefined,
     data: Booking | null,

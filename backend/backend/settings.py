@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'equipment',
     'courts',
     'bookings',
+    'analytics',
 ]
 
 MIDDLEWARE = [

@@ -10,7 +10,6 @@ import BookingList from "@/components/BookingList";
 import CourtList from "@/components/CourtList";
 import EquipmentList from "@/components/EquipmentList";
 import AnalyticsGraph from "@/components/AnalyticsGraph";
-import Profile from "@/components/Profile";
 import Navbar from "@/components/Navbar";
 import Background from "@/components/Background";
 import CheckIn from "@/components/CheckIn";
@@ -28,6 +27,8 @@ export default function DashboardPage() {
     adminBookings,
     adminCourts,
     adminEquipments,
+    analytics,
+    getAnalytics,
   } = useDataContext();
   const [data, setData] = useState<Booking[] | Court[] | Equipment[] | any>([]);
 
@@ -59,11 +60,8 @@ export default function DashboardPage() {
           break;
 
         case "analytics":
-          setData(user?.role === "Admin" ? [1] : []);
-          break;
-
-        case "profile":
-          setData([1]);
+          if (!analytics) await getAnalytics(user?._id);
+          setData(user?.role === "Admin" ? analytics : []);
           break;
 
         default:
@@ -84,6 +82,8 @@ export default function DashboardPage() {
     adminCourts,
     adminEquipments,
     adminBookings,
+    analytics,
+    getAnalytics,
   ]);
 
   return (
@@ -102,8 +102,9 @@ export default function DashboardPage() {
       {slug === "myequipment" && user?.role === "Admin" && (
         <EquipmentList equipment={data} />
       )}
-      {slug === "analytics" && user?.role === "Admin" && <AnalyticsGraph />}
-      {slug === "profile" && <Profile user={user} bookings={bookings} />}
+      {slug === "analytics" && user?.role === "Admin" && (
+        <AnalyticsGraph analytics={data} />
+      )}
     </div>
   );
 }
