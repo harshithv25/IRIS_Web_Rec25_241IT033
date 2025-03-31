@@ -4,6 +4,9 @@
 
 A **fast, secure, and reliable** sports infrastructure booking system built for **NITK**. This system allows students and faculty to book sports courts and equipment seamlessly. It leverages **Django (backend) and Next.js (frontend)** to ensure high performance and a smooth user experience.
 
+--- 
+Here is the video going through the features: 
+`https://drive.google.com/file/d/1dgDLpaIuJqWGvnrYOl_R71wUusoDnoYo/view?usp=drivesdk`
 ---
 
 ## 🚀 Why This System?
@@ -48,7 +51,9 @@ cd IRIS_Web_Rec25_241IT033/
 cd backend/
 ```
 
-#### 2️⃣ Create and activate a virtual environment
+#### 2️⃣ Create and activate a virtual environment 
+
+delete the existing venv folder from the git clone
 
 ```bash
 python3 -m venv venv
@@ -150,10 +155,10 @@ backend/
 ### **Frontend (Next.js)**
 
 ```
-frontend/
+src/
 │── components/       # Reusable UI components
 │── context/          # Global state management
-│── pages/            # Main routes
+│── app/            # Main routes
 │── services/         # API calls
 │── utils/            # Helper functions
 │── public/           # Static assets
@@ -245,7 +250,7 @@ frontend/
 ## ❗ Known bugs
 
 - **Log in using different accounts in the same browser make the app break**
-- **SMTP Provider not configured (the one in settings.py) doesnt seem to work as of now. But the email is being generated**
+- **SMTP Provider not configured (the one in settings.py) The mailer doesnt seem to work as of now. But the email is being generated and is being sent (confirmed from the logs).**
 - **Analytics isn't updating, even though new bookings are being created**
 
 ---
