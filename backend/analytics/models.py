@@ -27,8 +27,8 @@ class Analytics:
     @staticmethod
     def update(admin_id, data):
         analytics = Analytics.collection.find_one_and_update(
-            {"admin_id": ObjectId(admin_id)},
-            {"$set": data},
+            {"admin_id": admin_id},
+            data,
             return_document=True
         )
         return analytics

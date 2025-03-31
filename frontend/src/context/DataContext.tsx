@@ -9,6 +9,7 @@ import {
   Equipment,
   Court,
   Analytics,
+  Notification,
 } from "@/schemas/schemas";
 import { AuthContext } from "./AuthContext";
 import { baseUrl } from "@/utils/api";
@@ -28,6 +29,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     null
   );
   const [adminBookings, setAdminBookings] = useState<Booking[] | null>(null);
+  const [notifications, setNotifications] = useState<Notification[] | null>(
+    null
+  );
 
   const apiFetch = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("token");
@@ -138,9 +142,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const getAnalytics = async (adminId: string | undefined) => {
+  const getAnalytics = async (admin_id: string | undefined) => {
     try {
-      const response = await apiFetch(`analytics/?admin_id=${adminId}`);
+      const response = await apiFetch(`analytics/?admin_id=${admin_id}`);
 
       if (!response.ok) {
         const err = await response?.json();
@@ -148,6 +152,22 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
       }
       const data = await response?.json();
       setAnalytics(data.analytics);
+      return { isErr: false, errMessage: "" };
+    } catch (error: any) {
+      return { isErr: true, errMessage: error.message };
+    }
+  };
+
+  const getNotifications = async (user_id: string | undefined) => {
+    try {
+      const response = await apiFetch(`notifications/?user_id=${user_id}`);
+
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+      const data = await response?.json();
+      setNotifications(data.notifications);
       return { isErr: false, errMessage: "" };
     } catch (error: any) {
       return { isErr: true, errMessage: error.message };
@@ -340,6 +360,24 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
+  const updateNotifications = async (user_id: string | undefined) => {
+    try {
+      const response = await apiFetch(`notifications/?user_id=${user_id}`, {
+        method: "PUT",
+      });
+
+      if (!response.ok) {
+        const err = await response?.json();
+        return { isErr: true, errMessage: err.error };
+      }
+      const data = await response?.json();
+      // setNotifications(data.notifications);
+      return { isErr: false, errMessage: "" };
+    } catch (error: any) {
+      return { isErr: true, errMessage: error.message };
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -347,6 +385,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         equipment,
         courts,
         analytics,
+        notifications,
         adminBookings,
         adminCourts,
         adminEquipments,
@@ -357,9 +396,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({
         getEquipment,
         getCourts,
         getAnalytics,
+        getNotifications,
         updateBooking,
         updateEquipment,
         updateCourt,
+        updateNotifications,
       }}
     >
       {children}

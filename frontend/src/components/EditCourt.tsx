@@ -2,7 +2,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Calendar, Home, MapPin, Minus, Plus, Users, X } from "lucide-react";
+import {
+  Box,
+  Calendar,
+  ChevronDown,
+  Home,
+  MapPin,
+  Minus,
+  Plus,
+  Users,
+  X,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { validateCourt } from "@/utils/formValidations";
 import { useDataContext } from "@/context/DataContext";
@@ -24,6 +34,8 @@ const availableSlots = [
   "21-22",
   "22-23",
 ];
+
+const availablity = ["Available", "Unavailable"];
 
 const daysOfWeek = [
   "monday",
@@ -173,6 +185,41 @@ export default function EditCourt({ court }: { court: Court }) {
             onChange={(e) => setForm({ ...form, location: e.target.value })}
             className="w-full bg-transparent focus:outline-none"
           />
+        </div>
+
+        <div
+          className="flex relative items-center bg-[#06070E] border border-3 border-[#3e3e3e] text-white rounded-lg mb-4 p-2 cursor-pointer"
+          onClick={() =>
+            setDropdowns((prev) => ({
+              availablity: !prev.availablity,
+            }))
+          }
+        >
+          <Box size={20} className="mr-3 text-gray-400" />
+          <span className="w-full">
+            {form?.available ? "Available" : "Unavailable"}
+          </span>
+          <ChevronDown size={20} className="text-gray-400" />
+
+          {dropdowns.availablity && (
+            <div className="mt-1 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-21 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
+              {availablity.map((status) => (
+                <div
+                  key={status}
+                  className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
+                  onClick={() => {
+                    setForm({
+                      ...form,
+                      available: status === "Available" ? true : false,
+                    });
+                    setDropdowns((prev) => ({ ...prev, category: false }));
+                  }}
+                >
+                  {status}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Capacity Field */}

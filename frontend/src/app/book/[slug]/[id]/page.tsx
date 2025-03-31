@@ -192,7 +192,7 @@ export default function BookItemPage() {
       setSelectedSlot(slot);
     }
     // Get timestamp for selected slot
-    const dayOffset = day === "today" ? 1 : 2;
+    const dayOffset = day === "today" ? 0 : 1;
     const { start_time, end_time } = getTimestamp(slot, dayOffset);
 
     // Check if the selected slot is already booked

@@ -46,7 +46,6 @@ export function validateCourt(data: Court) {
   if (
     !data.admin_id ||
     !data.location ||
-    !data.available ||
     !data.name ||
     !data.operating_hours ||
     !data.capacity
@@ -64,7 +63,6 @@ export function validateEquipment(data: Equipment) {
   if (
     !data.admin_id ||
     !data.category ||
-    !data.available ||
     !data.name ||
     !data.operating_hours ||
     !data.condition ||

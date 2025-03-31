@@ -8,6 +8,7 @@ import { Equipment } from "@/schemas/schemas";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
+  Box,
   Calendar,
   ChevronDown,
   HeartPulse,
@@ -54,6 +55,7 @@ const availableCategories = [
   "misc",
 ];
 const availableConditions = ["New", "Used", "Damaged"];
+const availablity = ["Available", "Unavailable"];
 
 const daysOfWeek = [
   "monday",
@@ -202,13 +204,13 @@ export default function EditEquipment({ equipment }: { equipment: Equipment }) {
           </span>
           <ChevronDown size={20} className="text-gray-400" />
           {dropdowns.category && (
-            <div className="mt-1 z-11 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-40 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
+            <div className="mt-1 z-12 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-40 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
               {availableCategories.map((category) => (
                 <div
                   key={category}
                   className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
                   onClick={() => {
-                    setForm({ ...form, category });
+                    setForm({ category });
                     setDropdowns((prev) => ({ ...prev, condition: false }));
                   }}
                 >
@@ -232,17 +234,52 @@ export default function EditEquipment({ equipment }: { equipment: Equipment }) {
           <ChevronDown size={20} className="text-gray-400" />
 
           {dropdowns.condition && (
-            <div className="mt-1 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-31 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
+            <div className="mt-1 z-11 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-31 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
               {availableConditions.map((condition) => (
                 <div
                   key={condition}
                   className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
                   onClick={() => {
-                    setForm({ ...form, condition });
+                    setForm({ condition });
                     setDropdowns((prev) => ({ ...prev, category: false }));
                   }}
                 >
                   {condition}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div
+          className="flex relative items-center bg-[#06070E] border border-3 border-[#3e3e3e] text-white rounded-lg mb-4 p-2 cursor-pointer"
+          onClick={() =>
+            setDropdowns((prev) => ({
+              availablity: !prev.availablity,
+            }))
+          }
+        >
+          <Box size={20} className="mr-3 text-gray-400" />
+          <span className="w-full">
+            {form?.available ? "Available" : "Unavailable"}
+          </span>
+          <ChevronDown size={20} className="text-gray-400" />
+
+          {dropdowns.availablity && (
+            <div className="mt-1 flex overflow-y-scroll top-10 right-0 flex-col border border-3 border-[#3e3e3e] h-21 gap-2 bg-[#06070E] p-1 rounded-lg absolute">
+              {availablity.map((status) => (
+                <div
+                  key={status}
+                  className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
+                  onClick={() => {
+                    setForm({
+                      ...form,
+                      available: status === "Available" ? true : false,
+                    });
+                    setDropdowns((prev) => ({ ...prev, category: false }));
+                  }}
+                >
+                  {status}
                 </div>
               ))}
             </div>

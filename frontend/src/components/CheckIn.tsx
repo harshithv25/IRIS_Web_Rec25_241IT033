@@ -63,7 +63,7 @@ export default function CheckIn({
       ).then((res) => {
         setErr(res);
         if (!res.isErr) {
-          router.push("/dashbboard");
+          router.push("/dashboard");
         }
       });
     }
@@ -90,7 +90,7 @@ export default function CheckIn({
       ).then((res) => {
         setErr(res);
         if (!res.isErr) {
-          router.push("/dashbboard");
+          router.push("/dashboard/");
         }
       });
     }
@@ -132,7 +132,7 @@ export default function CheckIn({
             key={index}
             className="w-full h-screen flex justify-center items-center"
           >
-            <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
+            <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
               {section.map(
                 (booking: {
                   start_time: moment.MomentInput;
@@ -198,13 +198,13 @@ export default function CheckIn({
                     .utc()
                     .diff(moment(booking?.start_time), "hours");
                   const now = moment();
-                  const startTime = moment(booking?.start_time);
-                  const timeDiff = moment.duration(startTime.diff(now));
+                  const startTime = moment(booking?.start_time).utc();
+                  const timeDiff = startTime.hour() - now.hour();
 
                   const timeLeft =
-                    timeDiff.asMilliseconds() > 0
-                      ? `${timeDiff.hours()} Hours and ${timeDiff.minutes()} Minutes`
-                      : "Already Started";
+                    timeDiff > 0
+                      ? `${timeDiff} hours from now`
+                      : `Already started`;
 
                   return (
                     <div

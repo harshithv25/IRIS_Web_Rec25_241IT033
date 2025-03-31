@@ -64,7 +64,7 @@ export default function Booking() {
                 id={`section-${pageIndex}`}
                 className="w-full min-h-screen flex flex-col justify-center items-center snap-start"
               >
-                <div className="p-6 md:p-8 rounded-xl backdrop-blur-xs flex flex-col md:flex-row justify-center items-center gap-10 shadow-lg w-full max-w-full text-white">
+                <div className="p-6 md:p-8 rounded-xl backdrop-blur-xs flex flex-col lg:flex-row justify-center items-center gap-10 shadow-lg w-full max-w-full text-white">
                   {data
                     ?.slice(
                       pageIndex * itemsPerPage,
@@ -142,16 +142,22 @@ export default function Booking() {
                           </ol>
                         </div>
                         <hr className="text-[#3e3e3e] border width-30" />
-                        <button
-                          onClick={() =>
-                            router.push(`/book/${slug}/${item._id}`)
-                          }
-                          className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs"
-                        >
-                          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
-                            Book
-                          </span>
-                        </button>
+                        {item?.available ? (
+                          <button
+                            onClick={() =>
+                              router.push(`/book/${slug}/${item._id}`)
+                            }
+                            className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs"
+                          >
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                              Book
+                            </span>
+                          </button>
+                        ) : (
+                          <button className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs">
+                            <span className="text-gray-300">Unavailable</span>
+                          </button>
+                        )}
                       </div>
                     ))}
                 </div>

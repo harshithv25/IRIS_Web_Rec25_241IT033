@@ -2,13 +2,15 @@ from users.models import User
 from equipment.models import Equipment
 from courts.models import Court
 from analytics.models import Analytics
+from notifications.models import Notification
 from bson import ObjectId
 from django.conf import settings
 from datetime import datetime, timedelta
 from dateutil.parser import isoparse
 from pymongo import MongoClient
 import math, random
-
+from .utils.email import send_booking_confirmation, notify_admin, notify_waitlist_promotion, notify_admin_cancellation
+from .tasks import send_reminder_email
 
 # function to generate OTP
 def generatePassword() :
@@ -32,6 +34,17 @@ class Booking:
         tomorrow = today + timedelta(days=1)
         today_start = datetime.combine(today, datetime.min.time()).isoformat() + "Z"
         tomorrow_end = datetime.combine(tomorrow, datetime.max.time()).isoformat() + "Z"
+        booking_time = isoparse(data["start_time"])  # Convert ISO string to datetime
+        reminder_time = booking_time - timedelta(minutes=30)  # Schedule 30 minutes before
+
+        # Convert UTC now to timezone-aware
+        now = datetime.utcnow().replace(tzinfo=reminder_time.tzinfo)
+
+        # Calculate delay in seconds
+        delay_seconds = (reminder_time - now).total_seconds()  
+        
+        user = User.get_one("_id", data["user_id"])
+        admin = User.get_one("_id", data["admin_id"])
         
         existing_bookings = Booking.get_all_by_constraint("user_id", ObjectId(data["user_id"]))
         if data["booking_type"] == "Equipment": 
@@ -56,7 +69,7 @@ class Booking:
         
         # === Update Analytics ===
         admin_id = data["admin_id"]
-        infrastructure_name = str(data["name"])  # Convert ObjectId to string
+        infrastructure_name = data["name"]  # Convert ObjectId to string
 
         analytics = Analytics.get_by_admin(admin_id)
 
@@ -65,12 +78,23 @@ class Booking:
             if infrastructure_name in analytics["bookingCount"]["x"]:
                 index = analytics["bookingCount"]["x"].index(infrastructure_name)
                 analytics["bookingCount"]["y"][index] += 1
+
+                Analytics.update(analytics["_id"], {
+                            "$inc": {
+                            f"bookingCount.y.{infrastructure_name}": 1 
+                        }
+                    })  
+
             else:
                 # add new infrastructure entry
                 analytics["bookingCount"]["x"].append(infrastructure_name)
                 analytics["bookingCount"]["y"].append(1)
-            
-            Analytics.update(analytics["_id"], analytics)  # save
+                Analytics.update(analytics["_id"], {
+                    "$push": {
+                        "bookingCount.x": infrastructure_name,  # Append new infra name
+                        "bookingCount.y": 1  # Start with count 1
+                    }
+                })  # save
         else:
             # if no analytics entry exist, create new one
             new_analytics_data = {
@@ -83,6 +107,15 @@ class Booking:
             Analytics.create(new_analytics_data)
         
         booking = Booking.collection.insert_one(data)
+        
+    # Schedule Celery task
+        msg = str(booking.inserted_id)
+        # Ensure the delay is positive (avoid scheduling past times)
+        if delay_seconds > 0:
+            send_reminder_email.apply_async(args=(msg,), countdown=int(delay_seconds))    
+            
+        notification = Notification.create_notification(data["admin_id"], f"A new {data["booking_type"]} was booked. Log in to validate the booking")
+        notify_admin(admin["email"], data)
         return Booking.get_one("_id", ObjectId(booking.inserted_id))
 
     @staticmethod
@@ -117,9 +150,11 @@ class Booking:
         if not booking:
             raise ValueError("Booking not found")
 
-        if type == "cancel" and data.get("user_id"):
+        if type == "cancel" and data["user_id"]:
             # Promote next user from waitlist
             waitlist = booking.get("waitlist", {})
+            admin_email = User.get_one("_id", booking["admin_id"])["email"]
+            notify_admin_cancellation(admin_email, booking)
             if len(waitlist) >= 1:
                 # Get first user in waitlist (position "0")
                 next_user_id = waitlist.get("0")
@@ -136,6 +171,9 @@ class Booking:
                         {"$set": updated_data},
                         return_document=True
                     )
+                    notification = Notification.create_notification(next_user_id, f"Booking confirmed iD: {str(booking_id)} (the user infront of you cancelled!)")
+                    next_user_email = User.get_one("_id", next_user_id)["email"]
+                    notify_waitlist_promotion(next_user_email, booking)
                     return booking
             
             # If no waitlist, just update with cancel data
@@ -149,6 +187,7 @@ class Booking:
                 {"$set": updated_data},
                 return_document=True
             )
+            notification = Notification.create_notification(data["user_id"], f"Booking cancelled iD: {str(booking_id)}")
             return booking
 
         elif type == "check-in":
@@ -174,16 +213,17 @@ class Booking:
                 {"$set": {"expired": True, "waitlist": {}}},  # Clear waitlist
                 return_document=True
             )
+            notification = Notification.create_notification(booking["user_id"], f"successfully checked in: {str(booking_id)}")
             return booking
         
         elif type == "penalty":
-            if booking.get("admin_id") != ObjectId(data.admin_id):
+            if booking["admin_id"] != ObjectId(data.admin_id):
                 raise ValueError("Need to be an admin to add penalty to users")
             
             if not data.get("penalty_reason"):
                 raise ValueError("Penalty reason is required")
             
-            penalized_user_id = booking.get("user_id")
+            penalized_user_id = booking["user_id"]
             if not penalized_user_id:
                 raise ValueError("No user associated with this booking")
             
@@ -213,6 +253,8 @@ class Booking:
                 }
             }
             
+            notification = Notification.create_notification(booking["user_id"], f"You receive a penalty by {str(data.admin_id)}")
+            
             return penalty_invoice
 
         elif type == "validate":
@@ -233,7 +275,12 @@ class Booking:
                 {"_id": ObjectId(booking_id)},
                 {"$set": {"validated": True, "password": generatePassword()}},
                 return_document=True
+                
             )
+            user_email = User.get_one("_id", booking["user_id"])["email"]
+            send_booking_confirmation(user_email, booking)
+            notification = Notification.create_notification(booking["user_id"], f"Your booking {booking["name"]} has just been validated")
+            
             return booking
 
         elif type == "deny":
@@ -251,6 +298,8 @@ class Booking:
                 }},
                 return_document=True
             )
+            notification = Notification.create_notification(booking["user_id"], f"Your booking {booking["name"]} has has been cancelled")
+            
             return booking
 
         elif type == "waitlist":
@@ -277,6 +326,8 @@ class Booking:
                 {"$set": {f"waitlist.{len(waitlist)}": ObjectId(data.get("user_id"))}},
                 return_document=True
             )
+            notification = Notification.create_notification(data["user_id"], f"Joined the waiting list of the booking {booking["name"]}")
+            
             return booking
 
         raise ValueError("Invalid operation type")

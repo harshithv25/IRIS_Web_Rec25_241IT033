@@ -34,7 +34,7 @@ export default function EquipmentList({
               id={`section-${pageIndex}`}
               className="w-full min-h-screen flex flex-col justify-center items-center snap-start"
             >
-              <div className="p-6 md:p-8 rounded-xl backdrop-blur-xs flex flex-col md:flex-row justify-center items-center gap-10 shadow-lg w-full max-w-full text-white">
+              <div className="p-6 md:p-8 rounded-xl backdrop-blur-xs flex flex-col lg:flex-row justify-center items-center gap-10 shadow-lg w-full max-w-full text-white">
                 {equipment
                   ?.slice(
                     pageIndex * itemsPerPage,

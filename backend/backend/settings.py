@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # Use Redis as the message broker
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
 
 MONGO_URI = "mongodb://127.0.0.1:27017/IRIS_WEB_REC25_241IT033?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.4.2"
 MONGO_DB_NAME = "IRIS_WEB_REC25_241IT033"
@@ -55,6 +60,7 @@ INSTALLED_APPS = [
     'courts',
     'bookings',
     'analytics',
+    'notifications'
 ]
 
 MIDDLEWARE = [
@@ -120,6 +126,14 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp-relay.brevo.com"  # or your SMTP provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "89386e002@smtp-brevo.com"
+EMAIL_HOST_PASSWORD = "85SBTqfvU2Q7prJX"
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 DATABASES = {
     'default': {
