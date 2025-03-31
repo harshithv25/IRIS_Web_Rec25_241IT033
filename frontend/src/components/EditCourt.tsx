@@ -10,14 +10,6 @@ import { useRouter } from "next/navigation";
 import { capitalize } from "@/utils/capitalize";
 import { Court } from "@/schemas/schemas";
 
-const daysOfWeek = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 const availableSlots = [
   "11-12",
   "12-13",
@@ -33,25 +25,36 @@ const availableSlots = [
   "22-23",
 ];
 
+const daysOfWeek = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
+type WeekDay = (typeof daysOfWeek)[number];
+
 export default function EditCourt({ court }: { court: Court }) {
   const { user } = useAuth();
   const { updateCourt } = useDataContext();
   const router = useRouter();
 
   // Initialize form with existing court data
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Court | any>({
     _id: "",
     admin_id: user?._id,
     name: court?.name || "",
     location: court?.location || "",
     capacity: court?.capacity || 1,
     operating_hours: court?.operating_hours || {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
-      saturday: [],
+      monday: [] as string[],
+      tuesday: [] as string[],
+      wednesday: [] as string[],
+      thursday: [] as string[],
+      friday: [] as string[],
+      saturday: [] as string[],
     },
     available: court?.available ?? true,
   });
@@ -69,12 +72,12 @@ export default function EditCourt({ court }: { court: Court }) {
       location: court?.location || "",
       capacity: court?.capacity || 1,
       operating_hours: court?.operating_hours || {
-        monday: [],
-        tuesday: [],
-        wednesday: [],
-        thursday: [],
-        friday: [],
-        saturday: [],
+        monday: [] as string[],
+        tuesday: [] as string[],
+        wednesday: [] as string[],
+        thursday: [] as string[],
+        friday: [] as string[],
+        saturday: [] as string[],
       },
       available: court?.available ?? true,
     });
@@ -84,25 +87,26 @@ export default function EditCourt({ court }: { court: Court }) {
     setDropdowns((prev) => ({ [day]: !prev[day] }));
   };
 
-  const addSlot = (day: string, slot: string) => {
-    setForm((prev) => {
+  const addSlot = (day: WeekDay, slot: string) => {
+    setForm((prev: { operating_hours: any }) => {
       const updatedHours = { ...prev.operating_hours };
-      if (!updatedHours[day]) updatedHours[day] = [];
-      if (!updatedHours[day].includes(slot)) updatedHours[day].push(slot);
+      if (!updatedHours[day].includes(slot)) {
+        updatedHours[day] = [...updatedHours[day], slot];
+      }
       return { ...prev, operating_hours: updatedHours };
     });
   };
 
-  const removeSlot = (day: string, slot: string) => {
-    setForm((prev) => {
+  const removeSlot = (day: WeekDay, slot: string) => {
+    setForm((prev: { operating_hours: any }) => {
       const updatedHours = { ...prev.operating_hours };
-      updatedHours[day] = updatedHours[day].filter((s) => s !== slot);
+      updatedHours[day] = updatedHours[day].filter((s: string) => s !== slot);
       return { ...prev, operating_hours: updatedHours };
     });
   };
 
   const handleCapacityChange = (delta: number) => {
-    setForm((prev) => ({
+    setForm((prev: { capacity: number }) => ({
       ...prev,
       capacity: Math.max(1, prev.capacity + delta),
     }));

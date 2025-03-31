@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useLayoutEffect, useState } from "react";
@@ -12,14 +13,6 @@ import { useDataContext } from "@/context/DataContext";
 import { useRouter } from "next/navigation";
 import { capitalize } from "@/utils/capitalize";
 
-const daysOfWeek = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 const availableSlots = [
   "11-12",
   "12-13",
@@ -35,6 +28,17 @@ const availableSlots = [
   "22-23",
 ];
 
+const daysOfWeek = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
+type WeekDay = (typeof daysOfWeek)[number];
+
 export default function CreateCourt() {
   const { user } = useAuth();
   const { newCourt } = useDataContext();
@@ -44,12 +48,12 @@ export default function CreateCourt() {
     location: "",
     capacity: 1,
     operating_hours: {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
-      saturday: [],
+      monday: [] as string[],
+      tuesday: [] as string[],
+      wednesday: [] as string[],
+      thursday: [] as string[],
+      friday: [] as string[],
+      saturday: [] as string[],
     },
     available: true,
   });
@@ -58,27 +62,27 @@ export default function CreateCourt() {
     errMessage: "",
   });
   const [loading, setLoading] = useState(false);
-  const [dropdowns, setDropdowns] = useState<{ [key: string]: boolean }>({});
+  const [dropdowns, setDropdowns] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  const toggleDropdown = (day: string) => {
-    setDropdowns((prev) => ({ [day]: !prev[day] }));
+  const toggleDropdown = (day: WeekDay) => {
+    setDropdowns((prev) => ({ ...prev, [day]: !prev[day] }));
   };
 
-  const addSlot = (day: string, slot: string) => {
+  const addSlot = (day: WeekDay, slot: string) => {
     setForm((prev) => {
       const updatedHours = { ...prev.operating_hours };
-      if (!updatedHours[day]) updatedHours[day] = [];
-      if (!updatedHours[day].includes(slot)) updatedHours[day].push(slot);
+      if (!updatedHours[day].includes(slot)) {
+        updatedHours[day] = [...updatedHours[day], slot];
+      }
       return { ...prev, operating_hours: updatedHours };
     });
   };
 
-  const removeSlot = (day: string, slot: any) => {
+  const removeSlot = (day: WeekDay, slot: string) => {
     setForm((prev) => {
       const updatedHours = { ...prev.operating_hours };
       updatedHours[day] = updatedHours[day].filter((s) => s !== slot);
-      if (updatedHours[day].length === 0) delete updatedHours[day];
       return { ...prev, operating_hours: updatedHours };
     });
   };
@@ -90,12 +94,12 @@ export default function CreateCourt() {
     }));
   };
 
-  // useLayoutEffect(() => {
-  //   if (user?.role !== "Admin") {
-  //     console.log(user);
-  //     throw Error("Something went wrong");
-  //   }
-  // }, [user]);
+  useLayoutEffect(() => {
+    if (user?.role !== "Admin") {
+      console.log(user);
+      throw Error("Something went wrong");
+    }
+  }, [user]);
 
   const handleClick = () => {
     setLoading(true);
@@ -260,7 +264,7 @@ export default function CreateCourt() {
                   </div>
                 )}
                 <div className="mt-2 flex items-center justify-center flex flex-wrap gap-2">
-                  {form?.operating_hours[day]?.map((slot) => (
+                  {form?.operating_hours[day].map((slot: any) => (
                     <div
                       key={slot}
                       className="flex items-center gap-3 bg-black border border-1 border-[#3e3e3e] px-3 py-1 rounded-lg"

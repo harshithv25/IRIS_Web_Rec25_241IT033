@@ -33,14 +33,15 @@ export default function BookItemPage() {
     errMessage: "",
   });
   const [loading, setLoading] = useState(false);
-  const [item, setItem] = useState<Court | Equipment | null>();
+  const [item, setItem] = useState<Court | Equipment | any>(null);
   const [todaySelectedSlot, setTodaySelectedSlot] = useState<string>("");
   const [nextSelectedSlot, setNextSelectedSlot] = useState<string>("");
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [isSlotAvailable, setIsSlotAvailable] = useState<boolean | null>(null);
   const [result, setRes] = useState(0);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Booking>({
+    _id: "",
     user_id: user?._id,
     admin_id: item?.admin_id,
     booking_type: capitalize(slug as string),
@@ -135,7 +136,6 @@ export default function BookItemPage() {
     if (!selectedSlot) return;
 
     if (form.type === "waitlist") {
-      console.log(form.user_id, user?._id);
       await updateBooking(form?._id, form, false, "waitlist")
         .then((res) => {
           if (res.isErr) {
@@ -162,6 +162,7 @@ export default function BookItemPage() {
             setErr(res);
             console.log(res);
             setForm({
+              _id: "",
               user_id: "",
               admin_id: item?.admin_id,
               infrastructure_id: item?._id,
@@ -196,18 +197,6 @@ export default function BookItemPage() {
 
     // Check if the selected slot is already booked
 
-    console.log(
-      moment(start_time).utc().format("dddd"),
-      moment()
-        .utc()
-        .add(dayOffset, "days")
-        .hour(0)
-        .minute(0)
-        .second(0)
-        .milliseconds(0)
-        .format("dddd")
-    );
-
     let existingBooking = null;
 
     if (bookings) {
@@ -225,7 +214,7 @@ export default function BookItemPage() {
         admin_id: existingBooking?.admin_id,
         infrastructure_id: existingBooking?.infrastructure_id,
         name: existingBooking?.name,
-        _id: existingBooking._id,
+        _id: existingBooking?._id,
         start_time,
         end_time,
         validated: null,

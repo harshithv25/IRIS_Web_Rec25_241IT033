@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useLayoutEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Background from "@/components/Background";
 import Footer from "@/components/Footer";
@@ -30,14 +22,6 @@ import { useDataContext } from "@/context/DataContext";
 import { useRouter } from "next/navigation";
 import { capitalize } from "@/utils/capitalize";
 
-const daysOfWeek = [
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-];
 const availableSlots = [
   "11-12",
   "12-13",
@@ -74,6 +58,17 @@ const availableCategories = [
 
 const availableConditions = ["New", "Used", "Damaged"];
 
+const daysOfWeek = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+] as const;
+
+type WeekDay = (typeof daysOfWeek)[number];
+
 export default function CreateEquipment() {
   const { user } = useAuth();
   const { newEquipment } = useDataContext();
@@ -86,19 +81,19 @@ export default function CreateEquipment() {
     condition: "",
     available: true,
     operating_hours: {
-      monday: [],
-      tuesday: [],
-      wednesday: [],
-      thursday: [],
-      friday: [],
-      saturday: [],
+      monday: [] as string[],
+      tuesday: [] as string[],
+      wednesday: [] as string[],
+      thursday: [] as string[],
+      friday: [] as string[],
+      saturday: [] as string[],
     },
   });
   const [err, setErr] = useState({
     isErr: false,
     errMessage: "",
   });
-  const [dropdowns, setDropdowns] = useState({});
+  const [dropdowns, setDropdowns] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -106,20 +101,20 @@ export default function CreateEquipment() {
     setDropdowns((prev) => ({ [day]: !prev[day] }));
   };
 
-  const addSlot = (day: string, slot: string) => {
+  const addSlot = (day: WeekDay, slot: string) => {
     setForm((prev) => {
       const updatedHours = { ...prev.operating_hours };
-      if (!updatedHours[day]) updatedHours[day] = [];
-      if (!updatedHours[day].includes(slot)) updatedHours[day].push(slot);
+      if (!updatedHours[day].includes(slot)) {
+        updatedHours[day] = [...updatedHours[day], slot];
+      }
       return { ...prev, operating_hours: updatedHours };
     });
   };
 
-  const removeSlot = (day: string, slot: any) => {
+  const removeSlot = (day: WeekDay, slot: string) => {
     setForm((prev) => {
       const updatedHours = { ...prev.operating_hours };
       updatedHours[day] = updatedHours[day].filter((s) => s !== slot);
-      if (updatedHours[day].length === 0) delete updatedHours[day];
       return { ...prev, operating_hours: updatedHours };
     });
   };
@@ -131,11 +126,11 @@ export default function CreateEquipment() {
     }));
   };
 
-  // useLayoutEffect(() => {
-  //   if (user?.role !== "Admin") {
-  //     throw Error("Something went wrong");
-  //   }
-  // });
+  useLayoutEffect(() => {
+    if (user?.role !== "Admin") {
+      throw Error("Something went wrong");
+    }
+  });
 
   const handleClick = () => {
     setLoading(true);
@@ -352,47 +347,20 @@ export default function CreateEquipment() {
                   </div>
                 )}
                 <div className="mt-2 flex items-center justify-center flex flex-wrap gap-2">
-                  {form.operating_hours[day]?.map(
-                    (
-                      slot:
-                        | boolean
-                        | ReactElement<
-                            unknown,
-                            string | JSXElementConstructor<any>
-                          >
-                        | Iterable<ReactNode>
-                        | Promise<
-                            | string
-                            | number
-                            | bigint
-                            | boolean
-                            | ReactPortal
-                            | ReactElement<
-                                unknown,
-                                string | JSXElementConstructor<any>
-                              >
-                            | Iterable<ReactNode>
-                            | null
-                            | undefined
-                          >
-                        | Key
-                        | null
-                        | undefined
-                    ) => (
-                      <div
-                        key={slot}
-                        className="flex items-center gap-3 bg-black border border-1 border-[#3e3e3e] px-3 py-1 rounded-lg"
+                  {form.operating_hours[day]?.map((slot: any) => (
+                    <div
+                      key={slot}
+                      className="flex items-center gap-3 bg-black border border-1 border-[#3e3e3e] px-3 py-1 rounded-lg"
+                    >
+                      <span>{slot}</span>
+                      <button
+                        onClick={() => removeSlot(day, slot)}
+                        className="text-[#D90429] hover:text-[#FB4B68] cursor-pointer"
                       >
-                        <span>{slot}</span>
-                        <button
-                          onClick={() => removeSlot(day, slot)}
-                          className="text-[#D90429] hover:text-[#FB4B68] cursor-pointer"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    )
-                  )}
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
