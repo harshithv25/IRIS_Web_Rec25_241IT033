@@ -84,22 +84,28 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-12">
-          {[
-            {
-              href: !user ? "/login" : "/dashboard",
-              label: !user ? "Login" : "Dashboard",
-            },
-            { href: "/services", label: "Explore" },
-            { href: "/about", label: "Book Now!" },
-          ].map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
-            >
-              {label}
-            </Link>
-          ))}
+          <Link
+            href={!user ? "/login" : "/dashboard"}
+            className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
+          >
+            {!user ? "Login" : "Dashboard"}
+          </Link>
+          {user && (
+            <>
+              <Link
+                href="/notifications"
+                className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
+              >
+                Notifications
+              </Link>
+            </>
+          )}
+          <Link
+            href={!user ? "/login" : "/book/equipment"}
+            className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
+          >
+            Book Now!
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}

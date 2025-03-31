@@ -53,6 +53,7 @@ export default function LoginPage() {
             if (res.isErr) {
               setErr(res);
               setForm({ email: "", password: "" });
+              setStep(1);
             } else {
               setErr(res);
               router.push("/");
@@ -71,7 +72,7 @@ export default function LoginPage() {
     <div className="relative min-h-screen overflow-hidden">
       <Navbar />
       <Background />
-      <div className="flex flex-col justify-center items-center min-h-screen relative z-10 w-full snap-y snap-mandatory px-12 mx-auto">
+      <div className="flex flex-col mb-10 md:mb-0 justify-center items-center min-h-screen relative z-10 w-full snap-y snap-mandatory px-12 mx-auto">
         {!user ? (
           <>
             <div className="p-6 rounded-xl backdrop-blur shadow-lg w-96 text-white border-1 border-[#6770d2]">
