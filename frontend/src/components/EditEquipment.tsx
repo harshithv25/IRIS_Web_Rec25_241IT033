@@ -210,7 +210,7 @@ export default function EditEquipment({ equipment }: { equipment: Equipment }) {
                   key={category}
                   className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
                   onClick={() => {
-                    setForm({ ...form, category });
+                    setForm({ category });
                     setDropdowns((prev) => ({ ...prev, condition: false }));
                   }}
                 >
@@ -240,7 +240,7 @@ export default function EditEquipment({ equipment }: { equipment: Equipment }) {
                   key={condition}
                   className="px-3 py-1 rounded-lg bg-[#3e3e3e] cursor-pointer font-semibold text-white hover:bg-black"
                   onClick={() => {
-                    setForm({ ...form, condition });
+                    setForm({ condition });
                     setDropdowns((prev) => ({ ...prev, category: false }));
                   }}
                 >

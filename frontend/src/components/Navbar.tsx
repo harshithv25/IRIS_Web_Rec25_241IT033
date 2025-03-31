@@ -123,7 +123,7 @@ export default function Navbar() {
                 href="/notifications"
                 className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
               >
-                {notifications && !notifications[0].read ? (
+                {notifications?.length && !notifications[0].read ? (
                   <BellDot />
                 ) : (
                   <Bell />

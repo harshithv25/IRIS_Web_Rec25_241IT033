@@ -103,7 +103,7 @@ export default function Dashboard() {
       {cardSections.map((section, index) => (
         <div
           key={index}
-          className="flex flex-col justify-center items-center gap-10 min-h-screen mt-30 md:mt-7 md:mb-0 mb-15 relative z-10 w-full snap-y snap-mandatory px-12 mx-auto"
+          className="flex flex-col justify-center items-center gap-10 min-h-screen mt-30 lg:mt-7 lg:mb-0 mb-15 relative z-10 w-full snap-y snap-mandatory px-12 mx-auto"
         >
           {/* First Row (Top 3 cards) */}
           <div className="flex flex-wrap justify-center gap-10">

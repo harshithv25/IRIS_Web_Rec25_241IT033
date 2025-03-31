@@ -63,7 +63,7 @@ export default function CheckIn({
       ).then((res) => {
         setErr(res);
         if (!res.isErr) {
-          router.replace("/dashboard");
+          router.push("/dashboard");
         }
       });
     }
@@ -90,7 +90,7 @@ export default function CheckIn({
       ).then((res) => {
         setErr(res);
         if (!res.isErr) {
-          router.replace("/dashboard/");
+          router.push("/dashboard/");
         }
       });
     }
@@ -113,7 +113,7 @@ export default function CheckIn({
       setErr(res);
       if (!res.isErr) {
         alert("Check-in successful!");
-        router.replace("/dashboard");
+        router.push("/dashboard");
       } else {
         alert("Incorrect password or check-in failed. Please try again.");
       }
@@ -132,7 +132,7 @@ export default function CheckIn({
             key={index}
             className="w-full h-screen flex justify-center items-center"
           >
-            <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
+            <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
               {section.map(
                 (booking: {
                   start_time: moment.MomentInput;

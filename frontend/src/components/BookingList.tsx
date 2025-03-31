@@ -96,7 +96,7 @@ export default function BookingList({
             key={index}
             className="w-full h-screen flex justify-center items-center"
           >
-            <div className="w-full max-w-6xl flex flex-col md:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
+            <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center justify-center gap-10 p-6 mt-25 lg:mt-5">
               {section.map(
                 (booking: {
                   start_time: moment.MomentInput;
