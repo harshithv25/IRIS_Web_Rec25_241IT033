@@ -87,7 +87,7 @@ export default function BookingList({
   const bookingSections = chunkBookings(bookings, 3);
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col items-center">
+    <div className="relative w-full min-h-screen flex flex-col items-center justify-center">
       {bookings?.length === 0 ? (
         <p className="text-white mt-10 text-lg">No bookings found</p>
       ) : (
@@ -193,13 +193,13 @@ export default function BookingList({
                     .utc()
                     .diff(moment(booking?.start_time), "hours");
                   const now = moment();
-                  const startTime = moment(booking?.start_time);
-                  const timeDiff = moment.duration(startTime.diff(now));
+                  const startTime = moment(booking?.start_time).utc();
+                  const timeDiff = startTime.hour() - now.hour();
 
                   const timeLeft =
-                    timeDiff.asMilliseconds() > 0
-                      ? `${timeDiff.hours()} Hours and ${timeDiff.minutes()} Minutes`
-                      : "Already Started";
+                    timeDiff > 0
+                      ? `${timeDiff} hours from now`
+                      : `Already started`;
 
                   return (
                     <div
@@ -253,7 +253,7 @@ export default function BookingList({
                           <>
                             Your booking is scheduled on {formattedDate}{" "}
                             <span className="text-gray-400 text-sm font-bold">
-                              i.e. {timeLeft} from now
+                              i.e. {timeLeft}
                             </span>
                           </>
                         ) : (

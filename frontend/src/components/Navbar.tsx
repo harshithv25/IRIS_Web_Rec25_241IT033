@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Bell, BellDot, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
+import { useDataContext } from "@/context/DataContext";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -14,6 +16,12 @@ export default function Navbar() {
   const [hovered, setHovered] = useState(false);
   const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
   const { user } = useAuth()!;
+  const { notifications, getNotifications } = useDataContext();
+  const [err, setErr] = useState({
+    isErr: false,
+    errMessage: "",
+  });
+  const [result, setRes] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,10 +29,23 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScroll);
+
+    const fetchData = async () => {
+      if (!user) return;
+
+      if (!notifications?.length && result === 0) {
+        await getNotifications(user?._id).then((res) => {
+          setRes(result + 1);
+          setErr(res);
+        });
+      }
+    };
+
+    fetchData();
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [getNotifications, notifications?.length, result, user]);
 
   const handleMouseEnter = () => {
     setHoverTimeout(setTimeout(() => setHovered(true), 300));
@@ -90,22 +111,26 @@ export default function Navbar() {
           >
             {!user ? "Login" : "Dashboard"}
           </Link>
-          {user && (
-            <>
-              <Link
-                href="/notifications"
-                className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
-              >
-                Notifications
-              </Link>
-            </>
-          )}
           <Link
             href={!user ? "/login" : "/book/equipment"}
             className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
           >
             Book Now!
           </Link>
+          {user && (
+            <>
+              <Link
+                href="/notifications"
+                className="text-lg font-medium text-white transition-colors duration-300 hover:text-[#6770d2]"
+              >
+                {notifications && !notifications[0].read ? (
+                  <BellDot />
+                ) : (
+                  <Bell />
+                )}
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -133,15 +158,18 @@ export default function Navbar() {
             >
               {!user ? "Login" : "Dashboard"}
             </Link>
+            {user && (
+              <Link
+                href="/notifications"
+                className="text-lg font-medium hover:underline"
+                onClick={() => setMenuOpen(false)}
+              >
+                Notifications
+              </Link>
+            )}
+
             <Link
-              href="/services"
-              className="text-lg font-medium hover:underline"
-              onClick={() => setMenuOpen(false)}
-            >
-              Explore
-            </Link>
-            <Link
-              href="/contact"
+              href="/book/equipment"
               className="text-lg font-medium hover:underline"
               onClick={() => setMenuOpen(false)}
             >

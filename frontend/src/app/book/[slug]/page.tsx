@@ -142,16 +142,22 @@ export default function Booking() {
                           </ol>
                         </div>
                         <hr className="text-[#3e3e3e] border width-30" />
-                        <button
-                          onClick={() =>
-                            router.push(`/book/${slug}/${item._id}`)
-                          }
-                          className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs"
-                        >
-                          <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
-                            Book
-                          </span>
-                        </button>
+                        {item?.available ? (
+                          <button
+                            onClick={() =>
+                              router.push(`/book/${slug}/${item._id}`)
+                            }
+                            className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs"
+                          >
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-500">
+                              Book
+                            </span>
+                          </button>
+                        ) : (
+                          <button className="block transition-all cursor-pointer font-bold text-center text-white py-2 rounded-lg border-3 border-[#3e3e3e] backdrop-blur-xs">
+                            <span className="text-gray-300">Unavailable</span>
+                          </button>
+                        )}
                       </div>
                     ))}
                 </div>

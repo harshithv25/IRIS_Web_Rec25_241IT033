@@ -64,12 +64,19 @@ export interface Court {
 }
 
 export interface Analytics {
-  _id: string;
-  admin_id: string;
+  _id?: string;
+  admin_id: string | undefined;
   bookingCount: {
     x: string[];
     y: number[];
   };
+}
+
+export interface Notification {
+  _id?: string;
+  user_id: string | undefined;
+  text: string | undefined;
+  read: boolean;
 }
 
 export interface AuthContextType {
@@ -95,6 +102,7 @@ export interface DataContextType {
   equipment: Equipment[] | null;
   courts: Court[] | null;
   analytics: Analytics | null;
+  notifications: Notification[] | null;
   adminBookings: Booking[] | null;
   adminEquipments: Equipment[] | null;
   adminCourts: Court[] | null;
@@ -118,7 +126,8 @@ export interface DataContextType {
     field_value: string | null | undefined,
     admin: boolean
   ) => Promise<ErrorProps>;
-  getAnalytics: (adminId: string | undefined) => Promise<ErrorProps>;
+  getAnalytics: (admin_id: string | undefined) => Promise<ErrorProps>;
+  getNotifications: (user_id: string | undefined) => Promise<ErrorProps>;
   updateBooking: (
     booking_id: string | undefined,
     data: Booking | null,
@@ -135,6 +144,7 @@ export interface DataContextType {
     data: Court | null,
     admin: boolean
   ) => Promise<ErrorProps>;
+  updateNotifications: (user_id: string | undefined) => Promise<ErrorProps>;
 }
 
 export interface LoginResponse {
