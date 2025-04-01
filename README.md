@@ -102,7 +102,7 @@ npm install
 npm run dev
 ```
 
-MONGODB IS REQUIRED. Make sure you already have mongodb installed locally (as it doesnt run on NITK-NET) once you have it installed type
+MONGODB IS REQUIRED! Make sure you already have mongodb installed locally (as it doesnt run on NITK-NET) once you have it installed type
 
 ```bash
 mongosh
