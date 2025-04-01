@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import {
-  createContext,
-  useState,
-  ReactNode,
-  useContext,
-  useEffect,
-} from "react";
+import { createContext, useState, ReactNode, useContext, useEffect } from "react";
 import { baseUrl, myHeaders } from "../utils/api";
 import { jwtDecode } from "jwt-decode";
 import { AuthContextType, User } from "@/schemas/schemas";
@@ -26,6 +20,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (token) {
       try {
         const decoded: any = jwtDecode(token);
+
+        console.log(decoded);
 
         if (decoded.exp * 1000 < Date.now()) {
           console.log("Token expired");
@@ -103,14 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
   };
 
-  const register = async (
-    name: string,
-    email: string,
-    branch: string,
-    roll_number: string,
-    password: string,
-    role: string
-  ) => {
+  const register = async (name: string, email: string, branch: string, roll_number: string, password: string, role: string) => {
     try {
       await getCsrfToken();
 
@@ -142,11 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, csrfToken, login, logout, register }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, csrfToken, login, logout, register }}>{children}</AuthContext.Provider>;
 };
 
 // lets us access user anywhere in the application.

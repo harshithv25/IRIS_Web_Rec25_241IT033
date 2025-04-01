@@ -11,6 +11,7 @@ import GradientText from "@/components/GradientText";
 import { useAuth } from "@/context/AuthContext";
 import Background from "@/components/Background";
 import { useRouter } from "next/navigation";
+import { useDataContext } from "@/context/DataContext";
 
 export default function Page() {
   const { user } = useAuth();
@@ -40,13 +41,7 @@ export default function Page() {
         <section className="w-full h-screen md:pt-0 lg:pt-25 pt-28 flex flex-col items-center justify-center md:grid md:grid-cols-1 md:grid-cols-6 md:grid-flow-col-reverse px-6 max-w-7xl snap-center relative sm:gap-10 gap-6">
           <div className="md:col-span-3 flex items-center justify-center order-1 md:order-2">
             <FadeInSection>
-              <Image
-                src="/media/Basketball2.svg"
-                alt="Cyclist"
-                width={800}
-                height={800}
-                className="w-[800px] lg:w-[800px] object-contain"
-              />
+              <Image src="/media/Basketball2.svg" alt="Cyclist" width={800} height={800} className="w-[800px] lg:w-[800px] object-contain" />
             </FadeInSection>
           </div>
 
@@ -57,18 +52,15 @@ export default function Page() {
               </h1>
 
               <p className="text-lg md:text-xl opacity-70 mb-6">
-                Easily book your favorite sports, courts, and equipment for your
-                next game or practice sessions. Get rid of the hassle of
-                physical bookings!
+                Easily book your favorite sports, courts, and equipment for your next game or practice sessions. Get rid of the hassle of physical
+                bookings!
               </p>
 
               <button
                 onClick={scrollToNextSection}
                 className="relative px-6 py-2 cursor-pointer text-lg font-semibold rounded-lg border-3 border-[#3e3e3e]"
               >
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4C55A4] via-[#FFBA08] to-[#D90429]">
-                  Book Now
-                </span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#4C55A4] via-[#FFBA08] to-[#D90429]">Book Now</span>
               </button>
             </FadeInSection>
           </div>
@@ -83,13 +75,7 @@ export default function Page() {
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Image
-              src="/media/basketball.svg"
-              alt="Hovering Basketball"
-              width={500}
-              height={500}
-              className="w-[200px] md:w-[400px] object-contain"
-            />
+            <Image src="/media/basketball.svg" alt="Hovering Basketball" width={500} height={500} className="w-[200px] md:w-[400px] object-contain" />
           </motion.div>
 
           <div className="relative z-10 backdrop-blur-md md:text-left max-w-2xl px-6">
@@ -98,13 +84,11 @@ export default function Page() {
                 Hassle-Free Booking
               </h2>
               <p className="text-lg md:text-xl opacity-70 mb-6">
-                Say goodbye to the hassle of physical bookings! Our platform
-                revolutionizes sports facility reservations, making it easier
-                and more efficient than ever before.
+                Say goodbye to the hassle of physical bookings! Our platform revolutionizes sports facility reservations, making it easier and more
+                efficient than ever before.
               </p>
               <p className="text-lg md:text-xl opacity-70 mb-6">
-                Manage all your bookings in one place! Enjoy sports with your
-                friends and book equipment seamlessly.
+                Manage all your bookings in one place! Enjoy sports with your friends and book equipment seamlessly.
               </p>
               <button
                 onClick={(e) => {
@@ -126,13 +110,7 @@ export default function Page() {
           className="w-full mb-10 md:mb-0 h-screen md:pt-0 lg:pt-15 pt-28 flex flex-col items-center justify-center text-white text-3xl snap-center relative gap-8"
         >
           <div className="absolute right-50p bottom-50p md:right-auto md:bottom-auto">
-            <Image
-              src="/media/numbers.svg"
-              alt="Numbers vector"
-              width={500}
-              height={500}
-              className="w-[800px] md:w-[800px] object-contain"
-            />
+            <Image src="/media/numbers.svg" alt="Numbers vector" width={500} height={500} className="w-[800px] md:w-[800px] object-contain" />
           </div>
           <div className="z-10 p-55 backdrop-blur flex flex-col gap-5 justify-center items-center max-w-5xl text-center">
             <FadeInSection>
@@ -149,13 +127,7 @@ export default function Page() {
               <div className="p-6 rounded-lg shadow-lg">
                 <FadeInSection>
                   <h2 className="text-5xl font-bold text-[#FFBA08]">
-                    <Counter
-                      from={0}
-                      to={1000}
-                      separator=","
-                      direction="up"
-                      duration={1}
-                    />
+                    <Counter from={0} to={1000} separator="," direction="up" duration={1} />
                   </h2>
                   <p className="text-lg opacity-70">Total Bookings</p>
                 </FadeInSection>
@@ -163,13 +135,7 @@ export default function Page() {
               <div className="p-6 rounded-lg shadow-lg">
                 <FadeInSection>
                   <h2 className="text-5xl font-bold text-[#D90429]">
-                    <Counter
-                      from={0}
-                      to={100}
-                      separator=","
-                      direction="up"
-                      duration={1}
-                    />
+                    <Counter from={0} to={100} separator="," direction="up" duration={1} />
                   </h2>
                   <p className="text-lg opacity-70">Total Users</p>
                 </FadeInSection>

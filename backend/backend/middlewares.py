@@ -26,12 +26,12 @@ class JWTAuthenticationMiddleware:
             decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             if "_id" not in decoded:
                 return JsonResponse({"error": "Invalid token: Missing user ID"}, status=401)
-
+            
             # Set request attribute
             request.authorized = decoded["_id"]  
         except jwt.ExpiredSignatureError:
             return JsonResponse({"error": "Token expired"}, status=401)
         except jwt.InvalidTokenError:
-            return JsonResponse({"error": "Invalid token"}, status=401)
+            return JsonResponse({"error": "Invalid Token"}, status=401)
 
         return self.get_response(request)
