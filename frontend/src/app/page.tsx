@@ -142,6 +142,7 @@ export default function Page() {
               </div>
             </div>
           </div>
+          <p className="text-xs font-bold text-gray-500">This is just a sample data</p>
         </section>
 
         {/* Footer */}
