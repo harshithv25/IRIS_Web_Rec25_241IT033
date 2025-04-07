@@ -54,9 +54,10 @@ class LoginView(APIView):
                 "branch": user["branch"],
                 "roll_number": user["roll_number"],
                 "role": user["role"],
-                "exp": datetime.datetime.now() + datetime.timedelta(days=30),
-                "iat": datetime.datetime.now(),
+                "exp": (datetime.datetime.utcnow() + datetime.timedelta(days=30)).timestamp(),
+                "iat": datetime.datetime.utcnow().timestamp(),
             }
+
             token = jwt.encode(token_payload, settings.SECRET_KEY, algorithm="HS256")
             
             return Response(
